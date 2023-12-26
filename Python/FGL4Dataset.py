@@ -4,7 +4,7 @@ import numpy as np
 from torch.utils.data import Dataset
 
 
-class FGL3Dataset(Dataset):
+class FGL4Dataset(Dataset):
     def __init__(self, wanted_type_col, fluxindices, wantedtypes, wantedfeaturenames, pointsourcecatalogue):
         # Create x/input data
         xdata = []
@@ -19,14 +19,23 @@ class FGL3Dataset(Dataset):
                 # Append wanted parameters. We then applied a log transformation to some parameters that displayed
                 # highly skewed distributions.
                 unit.append(float(source[wantedfeaturenames[0]]))
-                unit.append(math.log(source[wantedfeaturenames[1]])
-                            if (source[wantedfeaturenames[1]] > 0) else float(source[wantedfeaturenames[1]]))
-                unit.append(math.log(source[wantedfeaturenames[2]])
-                            if (source[wantedfeaturenames[2]] > 0) else float(source[wantedfeaturenames[2]]))
-                unit.append(math.log(source[wantedfeaturenames[3]])
-                            if (source[wantedfeaturenames[3]] > 0) else float(source[wantedfeaturenames[3]]))
+                unit.append(float(source[wantedfeaturenames[1]]))
+                unit.append(float(source[wantedfeaturenames[2]]))
+                unit.append(float(source[wantedfeaturenames[3]]))
                 unit.append(math.log(source[wantedfeaturenames[4]])
                             if (source[wantedfeaturenames[4]] > 0) else float(source[wantedfeaturenames[4]]))
+                unit.append(math.log(source[wantedfeaturenames[5]])
+                            if (source[wantedfeaturenames[5]] > 0) else float(source[wantedfeaturenames[5]]))
+                unit.append(math.log(source[wantedfeaturenames[6]])
+                            if (source[wantedfeaturenames[6]] > 0) else float(source[wantedfeaturenames[6]]))
+                unit.append(math.log(source[wantedfeaturenames[7]])
+                            if (source[wantedfeaturenames[7]] > 0) else float(source[wantedfeaturenames[7]]))
+                unit.append(math.log(source[wantedfeaturenames[8]])
+                            if (source[wantedfeaturenames[8]] > 0) else float(source[wantedfeaturenames[8]]))
+                unit.append(float(source[wantedfeaturenames[9]]))
+                unit.append(float(source[wantedfeaturenames[10]]))
+                unit.append(float(source[wantedfeaturenames[11]]))
+                unit.append(float(source[wantedfeaturenames[12]]))
                 # Calculate hardness ratios (also considered in the paper)
                 for index in range(1, len(fluxindices)):
                     unit.append((source[fluxindices[index]] - source[fluxindices[index-1]] + 0.0) / (source[fluxindices[index]] + source[fluxindices[index-1]] + 0.0))
