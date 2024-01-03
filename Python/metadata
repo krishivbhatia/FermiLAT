@@ -1,4 +1,3 @@
-0 Source_Name
 1 DataRelease
 2 RAJ2000
 3 DEJ2000
@@ -9,6 +8,7 @@
 8 Conf_68_PosAng
 9 Conf_95_SemiMajor
 10 Conf_95_SemiMinor
+
 11 Conf_95_PosAng
 12 ROI_num
 13 Extended_Source_Name
@@ -19,6 +19,7 @@
 18 Energy_Flux100
 19 Unc_Energy_Flux100
 20 SpectrumType
+
 21 PL_Flux_Density
 22 Unc_PL_Flux_Density
 23 PL_Index
@@ -29,6 +30,7 @@
 28 Unc_LP_Index
 29 LP_beta
 30 Unc_LP_beta
+
 31 LP_SigCurv
 32 LP_EPeak
 33 Unc_LP_EPeak
@@ -39,6 +41,7 @@
 38 PLEC_ExpfactorS
 39 Unc_PLEC_ExpfactorS
 40 PLEC_Exp_Index
+
 41 Unc_PLEC_Exp_Index
 42 PLEC_SigCurv
 43 PLEC_EPeak
@@ -49,6 +52,7 @@
 48 nuFnu_Band
 49 Sqrt_TS_Band
 50 Variability_Index
+
 51 Frac_Variability
 52 Unc_Frac_Variability
 53 Signif_Peak
@@ -59,6 +63,7 @@
 58 Flux_History
 59 Unc_Flux_History
 60 Sqrt_TS_History
+
 61 ASSOC_4FGL
 62 TEVCAT_FLAG
 63 ASSOC_TEV
@@ -69,6 +74,7 @@
 68 RA_Counterpart
 69 DEC_Counterpart
 70 Unc_Counterpart
+
 71 Flags
 72 ASSOC_FGL
 73 ASSOC_FHL
@@ -77,4 +83,3 @@
 76 ASSOC_GAM3
 77 CLASS2
 78 ASSOC2
-columns =  79

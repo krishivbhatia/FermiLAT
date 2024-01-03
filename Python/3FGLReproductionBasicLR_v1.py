@@ -183,11 +183,10 @@ for iteration in range(0, 10):
         plt.show()
         best_p_values.append(bestp)
 
-sys.exit(0)
-
 # Generating Sensitivity vs Specificity Graph
 # We now have a list of best p-values, but I am not sure on how to generate a best-p-value from these values
 #   so I will just take the average of them
+print()
 print("best_p_values = ", best_p_values)
 optimal_p = mean(best_p_values)
 print("optimal_p = ", optimal_p)

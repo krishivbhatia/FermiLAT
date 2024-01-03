@@ -17,7 +17,7 @@ from collections import OrderedDict
 from torch.utils.data import DataLoader
 from sklearn.preprocessing import StandardScaler
 from FGL4Dataset import FGL4Dataset
-from LogisticRegression import LogisticRegression, run_iteration
+from LogisticRegression_DNN_3Layer import LogisticRegression_DNN_3Layer, run_iteration
 
 
 # https://www.youtube.com/watch?v=qx6y1OX4S6A Astropy for opening fits files
@@ -62,6 +62,7 @@ wantedfeatureindices = [mapkey[x] for x in wantedfeaturenames]
 # The paper wants hardness ratios of fluxes
 fluxlevels = ["Energy_Flux100"]
 fluxindices = [mapkey[x] for x in fluxlevels]
+# print("fluxindices = ", fluxindices)
 
 sc = StandardScaler()
 # Now we can make our dataset and dataloader
@@ -91,7 +92,7 @@ print("len(train_dataset.dataset) = ", len(train_dataset.dataset))
 # Training Logistic Regression Model/Model Building Procedure
 # In 10 epochs, 1 epoch will use a different final subset from one of the 10 subsets for testing
 best_p_values = []
-for iteration in range(0, 300):
+for iteration in range(0, 100):
     print()
     print("Iteration # ", iteration)
     total_samples = len(train_dataset)
@@ -100,23 +101,23 @@ for iteration in range(0, 300):
     dev_labels = []
     torch.set_default_tensor_type(torch.DoubleTensor)
     torch.manual_seed(82)
-    LogRegModel = LogisticRegression(train_dataset)  # Start from new model every epoch
+    LogRegModel = LogisticRegression_DNN_3Layer(train_dataset)  # Start from new model every epoch
     # Binary Cross Entropy Loss which is the loss method that would most likely be used in this scenario
     criterion = nn.BCELoss()
     # Stochastic Gradient Descent. I could use Adams but Adams is worse than regular SGD unless you
     optimizer = torch.optim.SGD(LogRegModel.parameters(), lr=0.0001)
-    print("optimizer = ", optimizer.__class__)
+    print("Optimizer = ", optimizer.__class__)
     # Train on 10 subsets
     (dev_inputs, dev_labels) = run_iteration(LogRegModel, iteration, train_dataset, total_samples, criterion,
                                              optimizer, dev_inputs, dev_labels, True)
 
     # Train for more epochs, 1 ain't enough LOL, you need at least 20-30 for good performance '
-    for epoch in range(0, 30):
+    for epoch in range(0, 20):
         (dev_inputs, dev_labels) = run_iteration(LogRegModel, iteration, train_dataset, total_samples, criterion,
                                                  optimizer, dev_inputs, dev_labels, False)
 
     # Test on final subset (different every time) to figure out P threshold value
-    with (torch.no_grad()):
+    with torch.no_grad():
         for i in range(0, len(dev_inputs)):
             dev_prediction = LogRegModel(dev_inputs[i])
             dev_predictions.append(dev_prediction)
@@ -154,8 +155,7 @@ for iteration in range(0, 300):
             # Pulsar Score/True Negative/Specificity
             y_points.append(1 if (psr_count == 0) else (true_negative / (psr_count + 0.0)))
             score = (1 if (agn_count == 0)
-                     else (true_positive / (agn_count + 0.0))) + \
-                          (1 if (psr_count == 0) else (true_negative / (psr_count + 0.0)))
+                     else (true_positive / (agn_count + 0.0))) + (1 if (psr_count == 0) else (true_negative / (psr_count + 0.0)))
             # The paper calculates the score as sensitivity + specificity
             if score > best_score:
                 best_score = score
@@ -192,13 +192,14 @@ optimal_p = mean(best_p_values)
 print("optimal_p = ", optimal_p)
 torch.manual_seed(42)
 # Now we found the optimal p value, we are ready to actually start training and testing the model
-LogRegModel = LogisticRegression(train_dataset)
+LogRegModel = LogisticRegression_DNN_3Layer(train_dataset)
 criterion = nn.BCELoss()
 optimizer = torch.optim.SGD(LogRegModel.parameters(), lr=0.0001)
-for epoch in range(0, 10):
+print("Optimizer = ", optimizer)
+for epoch in range(0, 5):
     print()
     print("Optimal_p epoch # ", epoch)
-    print
+    print()
     for i, (inputs, labels) in enumerate(train_dataset):
         y_predicted = LogRegModel(inputs)  # Insert/fit Model for prediction here
         loss = criterion(y_predicted, labels)
@@ -216,7 +217,7 @@ for epoch in range(0, 10):
                 if y_predicted < optimal_p and labels.item() == 0 or y_predicted > optimal_p and labels.item() == 1:
                     correct += 1
             print(f"Accuracy: {correct / (total + 0.0)}")
-    with (torch.no_grad()):
+    with torch.no_grad():
         for i in range(0, len(dev_inputs)):
             dev_prediction = LogRegModel(dev_inputs[i])
             dev_predictions.append(dev_prediction)
@@ -256,8 +257,7 @@ for epoch in range(0, 10):
             x_points.append(1 if (agn_count == 0) else (true_positive / (agn_count + 0.0)))
             # Pulsar Score/True Negative/Specificity
             y_points.append(1 if (psr_count == 0) else (true_negative / (psr_count + 0.0)))
-            score = (1 if (agn_count == 0) else (true_positive / (agn_count + 0.0))) + \
-                    (1 if (psr_count == 0) else (true_negative / (psr_count + 0.0)))
+            score = (1 if (agn_count == 0) else (true_positive / (agn_count + 0.0))) + (1 if (psr_count == 0) else (true_negative / (psr_count + 0.0)))
             # The paper calculates the score as sensitivity + specificity
             if score > best_score:
                 best_score = score
@@ -288,4 +288,5 @@ for epoch in range(0, 10):
         # plt.show()
         best_p_values.append(best_p)
 print("best_p_values = ", best_p_values)
+print("optimal_p = ", optimal_p)
 plt.show()

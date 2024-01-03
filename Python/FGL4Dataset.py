@@ -14,10 +14,8 @@ class FGL4Dataset(Dataset):
             # for feature_names in wantedfeaturenames:
             #     print("{0} = {1}".format(feature_names, source[feature_names]))
             if source[wanted_type_col] in wantedtypes:
-                # print("{}".format(source[wanted_type_col]))
                 unit = []
-                # Append wanted parameters. We then applied a log transformation to some parameters that displayed
-                # highly skewed distributions.
+                # Append wanted params. Applied a log transformation to paras with highly skewed distributions.
                 unit.append(float(source[wantedfeaturenames[0]]))
                 unit.append(float(source[wantedfeaturenames[1]]))
                 unit.append(float(source[wantedfeaturenames[2]]))
@@ -32,18 +30,20 @@ class FGL4Dataset(Dataset):
                             if (source[wantedfeaturenames[7]] > 0) else float(source[wantedfeaturenames[7]]))
                 unit.append(math.log(source[wantedfeaturenames[8]])
                             if (source[wantedfeaturenames[8]] > 0) else float(source[wantedfeaturenames[8]]))
+                # unit.append(math.log(source[wantedfeaturenames[9]])
+                #             if (source[wantedfeaturenames[9]] > 0) else float(source[wantedfeaturenames[9]]))
                 unit.append(float(source[wantedfeaturenames[9]]))
                 unit.append(float(source[wantedfeaturenames[10]]))
                 unit.append(float(source[wantedfeaturenames[11]]))
                 unit.append(float(source[wantedfeaturenames[12]]))
                 # Calculate hardness ratios (also considered in the paper)
                 for index in range(1, len(fluxindices)):
-                    unit.append((source[fluxindices[index]] - source[fluxindices[index-1]] + 0.0) / (source[fluxindices[index]] + source[fluxindices[index-1]] + 0.0))
-                if source[wanted_type_col] == "PSR" or source[wanted_type_col] == "psr":
-                    xdata.append(unit)
+                    unit.append((source[fluxindices[index]] - source[fluxindices[index-1]] + 0.0) /
+                                (source[fluxindices[index]] + source[fluxindices[index-1]] + 0.0))
+                xdata.append(unit)
+                if source[wanted_type_col] in ("PSR", "psr"):
                     ydata.append([0])  # 0 is for pulsar
-                elif source[wanted_type_col]:
-                    xdata.append(unit)
+                else:
                     ydata.append([1])  # 1 is for AGN
         self.x = torch.from_numpy(np.array(xdata, float))
         self.y = torch.from_numpy(np.array(ydata, float))

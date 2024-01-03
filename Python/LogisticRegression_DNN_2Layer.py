@@ -3,12 +3,14 @@ import torch
 import torch.nn as nn
 
 
-class LogisticRegression(nn.Module):
+class LogisticRegression_DNN_2Layer(nn.Module):
     def __init__(self, input_features):
         print("(len(input_features[0][0]) = ", len(input_features[0][0]))
         print("input_features[0][0] = ", input_features[0][0])
-        super(LogisticRegression, self).__init__()
-        self.model = nn.Linear(len(input_features[0][0]), 1)
+        super(LogisticRegression_DNN_2Layer, self).__init__()
+        self.model = nn.Sequential(nn.Linear(len(input_features[0][0]), 60),
+                                   nn.ReLU(),
+                                   nn.Linear(60, 1))
         print()
         print(self.model)
         print()

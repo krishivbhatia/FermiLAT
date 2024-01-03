@@ -284,7 +284,7 @@ for epoch in range(0, 30):
         loss.backward() #Backwards pass in back propagation
         optimizer.step() #Update weights based on gradients
         optimizer.zero_grad() #Reset gradients to 0
-    if ((epoch + 1) % 5 == 0):
+    if  ((epoch + 1) % 5 == 0):
         with torch.no_grad():
             correct = 0
             optimal_p = 0
@@ -395,7 +395,7 @@ with torch.no_grad():
             bestagnscore = 1 if (agncount == 0) else (truepositive / (agncount + 0.0))
             bestpsrscore = 1 if (psrcount == 0) else (truenegative / (psrcount + 0.0))
             bestaccuracy = (correct / (n_samples + 0.0))
-    #print(n_correct / (n_samples + 0.0))
+    #print(n_correct / (n_samples + 0.0)) 
     plt.plot(xpoints, ypoints)
     print(f"Best P Threshold Value : {bestp}")
     print(f"Best Score : {bestscore}")
