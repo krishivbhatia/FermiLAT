@@ -22,7 +22,11 @@ from LogisticRegression import LogisticRegression, run_iteration
 
 # https://www.youtube.com/watch?v=qx6y1OX4S6A Astropy for opening fits files
 # Use OS to find path https://www.pythoncheatsheet.org/cheatsheet/file-directory-path
+
+# KrishivB: The wanted_type_col has the wantedtypes. This is different between 3FGL and 4FGL file.
+#           Define it here and pass it to the FGL4Dataset class constructor
 wanted_type_col = 69
+# KrishivB: Modified path to 4FGL file
 path = os.path.join(os.getcwd(), "../FITS/gll_psc_v33.fit")
 mainfile = fits.open(path)
 pointsourcecatalogue = mainfile[1]
@@ -36,30 +40,34 @@ for key in list(pointsourcecatalogue.header.keys()):
     if "TTYPE" in key:
         keymap[int(key[5:len(key)])-1] = pointsourcecatalogue.header[key]
         mapkey[pointsourcecatalogue.header[key]] = int(key[5:len(key)])-1
+        # KrishivB: Print column number, name
         # print(columns, pointsourcecatalogue.header[key])
         columns += 1
-print("columns = ", columns)
+# KrishivB: Print # columns. Subtract 1 for column header
+print("# columns = ", columns-1)
+# This keymap contains all the names of the corresponding column, keymap[n] contains the name of the n+1th column
 keymap = OrderedDict(sorted(keymap.items()))
 mapkey = OrderedDict(sorted(mapkey.items()))
-# print("keymap = ", keymap)
 print()
-# print("mapkey = ", mapkey)
-# This keymap contains all the names of the corresponding column, keymap[n] contains the name of the n+1th column
 
 # pointsourcecatalogue.data[a][b] corresponds with the a+1th row and b+1th column in the catalogue
 # It is recommended you open the fit file to help easily find corresponding values
 
 # Creating Training and Test Datasets
 # The paper selects these classes of objects to be apart of the dataset
+# KrishivB: Added AGN in caps
 wantedtypes = ["PSR", "psr", "YNG", "yng", "MSP", "FSRQ", "fsrq", "BLL", "bll", "BCU", "bcu", "RDG", "rdg",
                "NLSY1", "nlsy1", "AGN", "agn", "ssrq", "sey"]
-# The paper selects these columns/features to be the inputs that will be taken into account
+# The 3FGL paper selects these columns/features to be the inputs that will be taken into account
+# KrishivB: Modified to 4FGL column names. Details in Abdollahi 2020 paper
 wantedfeaturenames = ["PL_Index", "LP_Index", "PLEC_IndexS", "Variability_Index", "Unc_PL_Flux_Density",
+                      # KrishivB: added it but later commented oput since slightly better performance without it
                       # "Pivot_Energy",
                       "Unc_LP_Flux_Density", "Unc_Energy_Flux100", "Unc_PLEC_Flux_Density",
                       "Unc_Flux1000", "LP_beta", "Frac_Variability", "LP_SigCurv", "Signif_Avg"]
 wantedfeatureindices = [mapkey[x] for x in wantedfeaturenames]
-# The paper wants hardness ratios of fluxes
+# The 3FGL paper wants hardness ratios of fluxes
+# KrishivB: found only 1 in 4FGL column names. Need to know if there are more
 fluxlevels = ["Energy_Flux100"]
 fluxindices = [mapkey[x] for x in fluxlevels]
 
@@ -67,6 +75,8 @@ sc = StandardScaler()
 # Now we can make our dataset and dataloader
 # More on basics of dataloaders here:
 #   https://www.youtube.com/watch?v=PXOzkkB5eH0&list=PLqnslRFeH2UrcDBWF5mfPGpqQDSta6VK4&index=9
+# KrishivB: separated class FGL3Dataset(Dataset) into file FGL4Dataset.py and imported it
+#           Just call its constructor here
 dataset = FGL4Dataset(wanted_type_col, fluxindices, wantedtypes, wantedfeaturenames, pointsourcecatalogue)
 print("len(dataset) = ", len(dataset))
 torch.manual_seed(42)  # Set shuffle seed to a certain value for reproducibility
@@ -83,15 +93,13 @@ print("len(train_dataset) = ", len(train_dataset))
 print("len(test_dataset) = ", len(test_dataset))
 print("len(train_dataset.dataset) = ", len(train_dataset.dataset))
 
-# Logistic Regression Model
-#   https://www.youtube.com/watch?v=OGpQxIkR4ao&list=PLqnslRFeH2UrcDBWF5mfPGpqQDSta6VK4&index=8
-# However I used 2 layers of neurons instead of 1 as it yields better results.
-# 1 layers of neurons would just be 1/(1 + e^-(input1 * weight1 + input2 * weight2 + input3 * weight3 ... + bias))
+# KrishivB: Put class LogisticRegression(nn.Module) in separate file LogisticRegression.py and imported it
 
+best_p_values = []
 # Training Logistic Regression Model/Model Building Procedure
 # In 10 epochs, 1 epoch will use a different final subset from one of the 10 subsets for testing
-best_p_values = []
-for iteration in range(0, 300):
+# KrishivB: changed # of epochs heere
+for iteration in range(0, 30):
     print()
     print("Iteration # ", iteration)
     total_samples = len(train_dataset)
@@ -107,6 +115,7 @@ for iteration in range(0, 300):
     optimizer = torch.optim.SGD(LogRegModel.parameters(), lr=0.0001)
     print("optimizer = ", optimizer.__class__)
     # Train on 10 subsets
+    # KrishivB: Put run_iteration code in LogisiticRegression.py as a separate method, imported it, and call here
     (dev_inputs, dev_labels) = run_iteration(LogRegModel, iteration, train_dataset, total_samples, criterion,
                                              optimizer, dev_inputs, dev_labels, True)
 
@@ -166,6 +175,7 @@ for iteration in range(0, 300):
                 best_accuracy = (correct / (n_samples + 0.0))
                 best_true_positive = true_positive
                 best_true_negative = true_negative
+        # Krishiv B: Do not want plots in every iteration. Just call in end.
         # plt.plot(x_points, y_points)
         print(f"Best P Threshold Value : {best_p}")
         print("Best true negative (Pulsar Successfully Identified): ", best_true_negative)
