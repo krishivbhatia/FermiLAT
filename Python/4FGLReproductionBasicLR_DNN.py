@@ -17,7 +17,7 @@ from collections import OrderedDict
 from torch.utils.data import DataLoader
 from sklearn.preprocessing import StandardScaler
 from FGL4Dataset import FGL4Dataset
-from LogisticRegression_DNN_2Layer import LogisticRegression_DNN_2Layer, run_iteration
+from LogisticRegression_DNN import LogisticRegression_DNN_3Layer, run_iteration
 
 
 # https://www.youtube.com/watch?v=qx6y1OX4S6A Astropy for opening fits files
@@ -107,7 +107,7 @@ for iteration in range(0, 30):
     dev_labels = []
     torch.set_default_tensor_type(torch.DoubleTensor)
     torch.manual_seed(82)
-    LogRegModel = LogisticRegression_DNN_2Layer(train_dataset)  # Start from new model every epoch
+    LogRegModel = LogisticRegression_DNN_3Layer(train_dataset)  # Start from new model every epoch
     # Binary Cross Entropy Loss which is the loss method that would most likely be used in this scenario
     criterion = nn.BCELoss()
     # Stochastic Gradient Descent. I could use Adams but Adams is worse than regular SGD unless you
@@ -201,7 +201,7 @@ optimal_p = mean(best_p_values)
 print("optimal_p = ", optimal_p)
 torch.manual_seed(42)
 # Now we found the optimal p value, we are ready to actually start training and testing the model
-LogRegModel = LogisticRegression_DNN_2Layer(train_dataset)
+LogRegModel = LogisticRegression_DNN_3Layer(train_dataset)
 criterion = nn.BCELoss()
 optimizer = torch.optim.SGD(LogRegModel.parameters(), lr=0.0001)
 for epoch in range(0, 10):

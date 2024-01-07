@@ -12,6 +12,7 @@ class LogisticRegression_DNN_2Layer(nn.Module):
         print("(len(input_features[0][0]) = ", len(input_features[0][0]))
         print("input_features[0][0] = ", input_features[0][0])
         super(LogisticRegression_DNN_2Layer, self).__init__()
+        # KrishivB: setup the NN model and print it in the logs
         self.model = nn.Sequential(nn.Linear(len(input_features[0][0]), 60),
                                    nn.ReLU(),
                                    nn.Linear(60, 1))
