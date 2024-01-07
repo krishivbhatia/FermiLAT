@@ -13,7 +13,7 @@ class LogisticRegression(nn.Module):
         print("input_features[0][0] = ", input_features[0][0])
         super(LogisticRegression, self).__init__()
         # KrishivB: setup the NN model and print it in the logs
-        # This has no hidden layer so it simply linear regression
+        # This has no hidden layer so is simply linear regression
         self.model = nn.Linear(len(input_features[0][0]), 1)
         print()
         print(self.model)
