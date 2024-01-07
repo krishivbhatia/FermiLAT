@@ -18,7 +18,8 @@ from torch.utils.data import DataLoader
 from sklearn.preprocessing import StandardScaler
 
 from FGL3Dataset import FGL3Dataset
-from LogisticRegression import LogisticRegression, run_iteration
+from LogisticRegression import LogisticRegression
+from utils import run_iteration
 
 
 # https://www.youtube.com/watch?v=qx6y1OX4S6A Astropy for opening fits files

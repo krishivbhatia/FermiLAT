@@ -17,7 +17,8 @@ from collections import OrderedDict
 from torch.utils.data import DataLoader
 from sklearn.preprocessing import StandardScaler
 from FGL4Dataset import FGL4Dataset
-from LogisticRegression import LogisticRegression, run_iteration
+from LogisticRegression import LogisticRegression
+from utils import run_iteration
 
 
 # https://www.youtube.com/watch?v=qx6y1OX4S6A Astropy for opening fits files
@@ -115,7 +116,7 @@ for iteration in range(0, 30):
     optimizer = torch.optim.SGD(LogRegModel.parameters(), lr=0.0001)
     print("optimizer = ", optimizer.__class__)
     # Train on 10 subsets
-    # KrishivB: Put run_iteration code in LogisiticRegression.py as a separate method, imported it, and call here
+    # KrishivB: Put run_iteration code in LogisticRegression.py as a separate method, imported it, and call here
     (dev_inputs, dev_labels) = run_iteration(LogRegModel, iteration, train_dataset, total_samples, criterion,
                                              optimizer, dev_inputs, dev_labels, True)
 

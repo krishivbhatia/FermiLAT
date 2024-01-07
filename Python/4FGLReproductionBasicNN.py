@@ -17,7 +17,8 @@ from collections import OrderedDict
 from torch.utils.data import DataLoader
 from sklearn.preprocessing import StandardScaler
 from FGL4Dataset import FGL4Dataset
-from NeuralNetwork import NeuralNetworkModel, run_iteration
+from NeuralNetwork import NeuralNetworkModel
+from utils import run_iteration
 
 
 # https://www.youtube.com/watch?v=qx6y1OX4S6A Astropy for opening fits files
