@@ -116,12 +116,13 @@ for iteration in range(0, 30):
     optimizer = torch.optim.SGD(LogRegModel.parameters(), lr=0.0001)
     print("optimizer = ", optimizer.__class__)
     # Train on 10 subsets
-    # KrishivB: Put run_iteration code in LogisticRegression.py as a separate method, imported it, and call here
+    # KrishivB: Put run_iteration code in utils.py, imported it, and call here
     (dev_inputs, dev_labels) = run_iteration(LogRegModel, iteration, train_dataset, total_samples, criterion,
                                              optimizer, dev_inputs, dev_labels, True)
 
     # Train for more epochs, 1 ain't enough LOL, you need at least 20-30 for good performance '
     for epoch in range(0, 30):
+        # KrishivB: Used run_iteration method from utils.py
         (dev_inputs, dev_labels) = run_iteration(LogRegModel, iteration, train_dataset, total_samples, criterion,
                                                  optimizer, dev_inputs, dev_labels, False)
 

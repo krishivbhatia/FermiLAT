@@ -94,7 +94,6 @@ print("len(test_dataset) = ", len(test_dataset))
 print("len(train_dataset.dataset) = ", len(train_dataset.dataset))
 
 # KrishivB: Put class LogisticRegression(nn.Module) in separate file LogisticRegression.py and imported it
-
 best_p_values = []
 # Training Logistic Regression Model/Model Building Procedure
 # In 10 epochs, 1 epoch will use a different final subset from one of the 10 subsets for testing
@@ -115,12 +114,13 @@ for iteration in range(0, 30):
     optimizer = torch.optim.SGD(NeuralNetworkModel.parameters(), lr=0.0001)
     print("optimizer = ", optimizer.__class__)
     # Train on 10 subsets
-    # KrishivB: Put run_iteration code in LogisiticRegression.py as a separate method, imported it, and call here
+    # KrishivB: Put run_iteration code in utils.py, imported it, and call here
     (dev_inputs, dev_labels) = run_iteration(NeuralNetworkModel, iteration, train_dataset, total_samples, criterion,
                                              optimizer, dev_inputs, dev_labels, True)
 
     # Train for more epochs, 1 ain't enough LOL, you need at least 20-30 for good performance '
     for epoch in range(0, 30):
+        # KrishivB: Used run_iteration method from utils.py
         (dev_inputs, dev_labels) = run_iteration(NeuralNetworkModel, iteration, train_dataset, total_samples, criterion,
                                                  optimizer, dev_inputs, dev_labels, False)
 
