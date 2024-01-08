@@ -47,7 +47,11 @@ for key in list(pointsourcecatalogue.header.keys()):
 # KrishivB: Print # columns. Subtract 1 for column header
 print("# columns = ", columns-1)
 # This keymap contains all the names of the corresponding column, keymap[n] contains the name of the n+1th column
+# KrishivB: keymap maps column # to name
+#           keymap =  OrderedDict([(0, 'Source_Name'), (1, 'RAJ2000'), (2, 'DEJ2000') ...
 keymap = OrderedDict(sorted(keymap.items()))
+# KrishivB: mapkey maps column name to #
+#           mapkey =  OrderedDict([('0FGL_Name', 64), ('1FGL_Name', 65), ('1FHL_Name', 67) ...
 mapkey = OrderedDict(sorted(mapkey.items()))
 print()
 
@@ -62,8 +66,6 @@ wantedtypes = ["PSR", "psr", "YNG", "yng", "MSP", "FSRQ", "fsrq", "BLL", "bll", 
 # The 3FGL paper selects these columns/features to be the inputs that will be taken into account
 # KrishivB: Modified to 4FGL column names. Details in Abdollahi 2020 paper
 wantedfeaturenames = ["PL_Index", "LP_Index", "PLEC_IndexS", "Variability_Index", "Unc_PL_Flux_Density",
-                      # KrishivB: added it but later commented oput since slightly better performance without it
-                      # "Pivot_Energy",
                       "Unc_LP_Flux_Density", "Unc_Energy_Flux100", "Unc_PLEC_Flux_Density",
                       "Unc_Flux1000", "LP_beta", "Frac_Variability", "LP_SigCurv", "Signif_Avg"]
 wantedfeatureindices = [mapkey[x] for x in wantedfeaturenames]
@@ -76,7 +78,7 @@ sc = StandardScaler()
 # Now we can make our dataset and dataloader
 # More on basics of dataloaders here:
 #   https://www.youtube.com/watch?v=PXOzkkB5eH0&list=PLqnslRFeH2UrcDBWF5mfPGpqQDSta6VK4&index=9
-# KrishivB: separated class FGL3Dataset(Dataset) into file FGL4Dataset.py and imported it
+# KrishivB: separated class FGL4Dataset(Dataset) into file FGL4Dataset.py and imported it
 #           Just call its constructor here
 dataset = FGL4Dataset(wanted_type_col, fluxindices, wantedtypes, wantedfeaturenames, pointsourcecatalogue)
 print("len(dataset) = ", len(dataset))
@@ -95,11 +97,10 @@ print("len(test_dataset) = ", len(test_dataset))
 print("len(train_dataset.dataset) = ", len(train_dataset.dataset))
 
 # KrishivB: Put class LogisticRegression(nn.Module) in separate file LogisticRegression.py and imported it
-
 best_p_values = []
 # Training Logistic Regression Model/Model Building Procedure
 # In 10 epochs, 1 epoch will use a different final subset from one of the 10 subsets for testing
-# KrishivB: changed # of epochs heere
+# KrishivB: changed # of epochs here
 for iteration in range(0, 30):
     print()
     print("Iteration # ", iteration)

@@ -30,12 +30,9 @@ from statistics import *
 path = os.path.join(os.getcwd(), "../FITS/gll_psc_v16.fit")
 print(path)
 mainfile = fits.open(path)
-mainfile.info()
 pointsourcecatalogue = mainfile[1]
-#print(pointsourcecatalogue.info())
-
-#print(pointsourcecatalogue.header)
-#print(list(pointsourcecatalogue.header.keys()))
+print("pointsourcecatalogue.header = ", pointsourcecatalogue.header)
+print("list(pointsourcecatalogue.header.keys() = ", list(pointsourcecatalogue.header.keys()))
 
 columns = 0
 keymap = {}
@@ -49,8 +46,8 @@ for key in list(pointsourcecatalogue.header.keys()):
 #print(columns)
 keymap = OrderedDict(sorted(keymap.items()))
 mapkey = OrderedDict(sorted(mapkey.items()))
-print(keymap)
-print(mapkey)
+print("keymap = ", keymap)
+print("mapkey = ", mapkey)
 #This keymap contains all the names of the corresponding column, keymap[n] contains the name of the n+1th column
 
 #pointsourcecatalogue.data[a][b] corresponds with the a+1th row and b+1th column in the catalogue
@@ -63,9 +60,11 @@ wantedtypes = ["PSR", "psr", "YNG", "yng", "MSP", "FSRQ", "fsrq", "BLL", "bll", 
 #The paper selects these columns/features to be the inputs that will be taken into account
 wantedfeaturenames = ["Spectral_Index", "Variability_Index", "Flux_Density", "Unc_Energy_Flux100", "Signif_Curve"]
 wantedfeatureindices = [mapkey[x] for x in wantedfeaturenames]
+print("wantedfeatureindices = ", wantedfeatureindices)
 #The paper wants hardness ratios of fluxes
 fluxlevels = ["Flux100_300", "Flux300_1000", "Flux1000_3000", "Flux3000_10000", "Flux10000_100000"]
 fluxindices = [mapkey[x] for x in fluxlevels]
+print("fluxindices = ", fluxindices)
 #Pytorch Datasets and ML Models are constructed in modular class/OOP style
 
 sc = StandardScaler()
