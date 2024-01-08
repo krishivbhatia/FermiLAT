@@ -107,27 +107,27 @@ for iteration in range(0, 30):
     dev_labels = []
     torch.set_default_tensor_type(torch.DoubleTensor)
     torch.manual_seed(82)
-    NeuralNetworkModel = NeuralNetworkModel(train_dataset)  # Start from new model every epoch
+    DNNModel = NeuralNetworkModel(train_dataset)  # Start from new model every epoch
     # Binary Cross Entropy Loss which is the loss method that would most likely be used in this scenario
     criterion = nn.BCELoss()
     # Stochastic Gradient Descent. I could use Adams but Adams is worse than regular SGD unless you
-    optimizer = torch.optim.SGD(NeuralNetworkModel.parameters(), lr=0.0001)
+    optimizer = torch.optim.SGD(DNNModel.parameters(), lr=0.0001)
     print("optimizer = ", optimizer.__class__)
     # Train on 10 subsets
     # KrishivB: Put run_iteration code in utils.py, imported it, and call here
-    (dev_inputs, dev_labels) = run_iteration(NeuralNetworkModel, iteration, train_dataset, total_samples, criterion,
+    (dev_inputs, dev_labels) = run_iteration(DNNModel, iteration, train_dataset, total_samples, criterion,
                                              optimizer, dev_inputs, dev_labels, True)
 
     # Train for more epochs, 1 ain't enough LOL, you need at least 20-30 for good performance '
     for epoch in range(0, 30):
         # KrishivB: Used run_iteration method from utils.py
-        (dev_inputs, dev_labels) = run_iteration(NeuralNetworkModel, iteration, train_dataset, total_samples, criterion,
+        (dev_inputs, dev_labels) = run_iteration(DNNModel, iteration, train_dataset, total_samples, criterion,
                                                  optimizer, dev_inputs, dev_labels, False)
 
     # Test on final subset (different every time) to figure out P threshold value
     with (torch.no_grad()):
         for i in range(0, len(dev_inputs)):
-            dev_prediction = NeuralNetworkModel(dev_inputs[i])
+            dev_prediction = DNNModel(dev_inputs[i])
             dev_predictions.append(dev_prediction)
         x_points = []
         y_points = []
@@ -202,15 +202,15 @@ optimal_p = mean(best_p_values)
 print("optimal_p = ", optimal_p)
 torch.manual_seed(42)
 # Now we found the optimal p value, we are ready to actually start training and testing the model
-NeuralNetworkModel = NeuralNetworkModel(train_dataset)
+DNNModel = NeuralNetworkModel(train_dataset)
 criterion = nn.BCELoss()
-optimizer = torch.optim.SGD(NeuralNetworkModel.parameters(), lr=0.0001)
+optimizer = torch.optim.SGD(DNNModel.parameters(), lr=0.0001)
 for epoch in range(0, 10):
     print()
     print("Optimal_p epoch # ", epoch)
     print
     for i, (inputs, labels) in enumerate(train_dataset):
-        y_predicted = NeuralNetworkModel(inputs)  # Insert/fit Model for prediction here
+        y_predicted = DNNModel(inputs)  # Insert/fit Model for prediction here
         loss = criterion(y_predicted, labels)
         # Pytorch Gradient Descent Procedure
         loss.backward()  # Backwards pass in back propagation
@@ -222,13 +222,13 @@ for epoch in range(0, 10):
             optimal_p = 0
             total = len(test_dataset)
             for i, (inputs, labels) in enumerate(test_dataset):
-                y_predicted = NeuralNetworkModel(inputs)  # Insert/fit Model for prediction here
+                y_predicted = DNNModel(inputs)  # Insert/fit Model for prediction here
                 if y_predicted < optimal_p and labels.item() == 0 or y_predicted > optimal_p and labels.item() == 1:
                     correct += 1
             print(f"Accuracy: {correct / (total + 0.0)}")
     with (torch.no_grad()):
         for i in range(0, len(dev_inputs)):
-            dev_prediction = NeuralNetworkModel(dev_inputs[i])
+            dev_prediction = DNNModel(dev_inputs[i])
             dev_predictions.append(dev_prediction)
         x_points = []
         y_points = []

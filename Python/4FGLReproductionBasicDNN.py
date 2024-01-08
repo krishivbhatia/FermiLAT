@@ -17,7 +17,7 @@ from collections import OrderedDict
 from torch.utils.data import DataLoader
 from sklearn.preprocessing import StandardScaler
 from FGL4Dataset import FGL4Dataset
-from DeepNuralNetwork import DeepNeuralNetworkModel
+from DeepNeuralNetwork import DeepNeuralNetworkModel
 from utils import run_iteration
 
 

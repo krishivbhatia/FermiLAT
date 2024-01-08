@@ -21,7 +21,6 @@ class DeepNeuralNetworkModel(nn.Module):
         print(self.model)
         print()
 
-
     def forward(self, x):
         y_predicted = torch.sigmoid(self.model(x))
         return y_predicted
