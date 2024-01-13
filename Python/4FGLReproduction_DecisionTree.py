@@ -95,8 +95,8 @@ dev_inputs = []
 dev_labels = []
 torch.set_default_tensor_type(torch.DoubleTensor)
 torch.manual_seed(42)
-decision_tree = TorchDecisionTreeClassifier(10)
-print("TorchDecisionTreeClassifier = ", 10)
+decision_tree = TorchDecisionTreeClassifier(30)
+print("TorchDecisionTreeClassifier = ", 30)
 train_features = ([((i[0]).detach().numpy()) for i in train_dataset])
 train_labels = ([torch.LongTensor.item(i[1]) for i in train_dataset])
 decision_tree.fit(torch.FloatTensor(train_features), torch.LongTensor(train_labels))
