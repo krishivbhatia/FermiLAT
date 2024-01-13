@@ -107,10 +107,12 @@ test_labels = ([i[1] for i in test_dataset])
 print("test_size = ", len(test_features))
 correct = 0
 for i in range(test_size):
+    print("i = ", i)
     predicted_result = decision_tree.predict(torch.FloatTensor(test_features[i]))
     actual_result = torch.IntTensor.item(test_labels[i])
     print("i, predicted_result, actual_result = ", i, predicted_result, actual_result)
     if predicted_result == actual_result:
         correct += 1
-print("correct = ", correct)
+        print("correct = ", correct)
+print("Total correct = ", correct)
 print("sensitivity = ", correct*100/test_size)
