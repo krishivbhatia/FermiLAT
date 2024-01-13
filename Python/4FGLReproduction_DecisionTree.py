@@ -41,7 +41,7 @@ for key in list(pointsourcecatalogue.header.keys()):
         mapkey[pointsourcecatalogue.header[key]] = int(key[5:len(key)])-1
         # print(columns, pointsourcecatalogue.header[key])
         columns += 1
-print("columns = ", columns)
+print("columns = ", columns - 1)
 keymap = OrderedDict(sorted(keymap.items()))
 mapkey = OrderedDict(sorted(mapkey.items()))
 # print("keymap = ", keymap)
@@ -95,8 +95,8 @@ dev_inputs = []
 dev_labels = []
 torch.set_default_tensor_type(torch.DoubleTensor)
 torch.manual_seed(42)
-decision_tree = TorchDecisionTreeClassifier(30)
-print("TorchDecisionTreeClassifier = ", 30)
+decision_tree = TorchDecisionTreeClassifier(60)
+print("TorchDecisionTreeClassifier = ", 60)
 train_features = ([((i[0]).detach().numpy()) for i in train_dataset])
 train_labels = ([torch.LongTensor.item(i[1]) for i in train_dataset])
 decision_tree.fit(torch.FloatTensor(train_features), torch.LongTensor(train_labels))
