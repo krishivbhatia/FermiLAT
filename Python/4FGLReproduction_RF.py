@@ -95,7 +95,8 @@ dev_inputs = []
 dev_labels = []
 torch.set_default_tensor_type(torch.DoubleTensor)
 torch.manual_seed(42)
-random_forest = TorchRandomForestClassifier(100, 500, 10)
+random_forest = TorchRandomForestClassifier(100, 2500, 12)
+print("random forest = ", 100, 2500, 12)
 train_features = ([((i[0]).detach().numpy()) for i in train_dataset])
 train_labels = ([torch.LongTensor.item(i[1]) for i in train_dataset])
 random_forest.fit(torch.FloatTensor(train_features), torch.LongTensor(train_labels))
