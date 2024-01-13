@@ -62,7 +62,7 @@ wantedfeaturenames = ["PL_Index", "LP_Index", "PLEC_IndexS", "Variability_Index"
                       "LP_beta", "Frac_Variability", "LP_SigCurv", "Signif_Avg"]
 wantedfeatureindices = [mapkey[x] for x in wantedfeaturenames]
 # The paper wants hardness ratios of fluxes
-fluxlevels = ["Flux1000", "Unc_Flux1000", "Energy_Flux100", "Unc_Energy_Flux100"]
+fluxlevels = ["Energy_Flux100"]
 fluxindices = [mapkey[x] for x in fluxlevels]
 # print("fluxindices = ", fluxindices)
 # Pytorch Datasets and ML Models are constructed in modular class/OOP style
