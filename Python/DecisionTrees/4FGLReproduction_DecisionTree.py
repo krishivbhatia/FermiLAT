@@ -7,26 +7,21 @@ Created on Thu Aug 10 13:15:48 2023
 """
 
 import os
-import sys
 
-import numpy as np
 import torch
-import torch.nn as nn
-from statistics import *
 from astropy.io import fits
-import matplotlib.pyplot as plt
 from collections import OrderedDict
 from torch.utils.data import DataLoader
 from sklearn.preprocessing import StandardScaler
 
-from FGL4Dataset import FGL4Dataset
-from random_forest import TorchRandomForestClassifier
+from Utils.FGL4Dataset import FGL4Dataset
+from DecisionTrees.decision_tree import TorchDecisionTreeClassifier
 
 
 # https://www.youtube.com/watch?v=qx6y1OX4S6A Astropy for opening fits files
 # Use OS to find path https://www.pythoncheatsheet.org/cheatsheet/file-directory-path
 wanted_type_col = 69
-path = os.path.join(os.getcwd(), "../FITS/gll_psc_v33.fit")
+path = os.path.join(os.getcwd(), "../../FITS/gll_psc_v33.fit")
 mainfile = fits.open(path)
 pointsourcecatalogue = mainfile[1]
 # print("pointsourcecatalogue.header = ", pointsourcecatalogue.header)
@@ -41,7 +36,7 @@ for key in list(pointsourcecatalogue.header.keys()):
         mapkey[pointsourcecatalogue.header[key]] = int(key[5:len(key)])-1
         # print(columns, pointsourcecatalogue.header[key])
         columns += 1
-print("columns = ", columns-1)
+print("columns = ", columns - 1)
 keymap = OrderedDict(sorted(keymap.items()))
 mapkey = OrderedDict(sorted(mapkey.items()))
 # print("keymap = ", keymap)
@@ -95,11 +90,11 @@ dev_inputs = []
 dev_labels = []
 torch.set_default_tensor_type(torch.DoubleTensor)
 torch.manual_seed(42)
-random_forest = TorchRandomForestClassifier(200, 2500, 15)
-print("random forest = ", 200, 2500, 15)
+decision_tree = TorchDecisionTreeClassifier(20)
+print("TorchDecisionTreeClassifier = ", 20)
 train_features = ([((i[0]).detach().numpy()) for i in train_dataset])
 train_labels = ([torch.LongTensor.item(i[1]) for i in train_dataset])
-random_forest.fit(torch.FloatTensor(train_features), torch.LongTensor(train_labels))
+decision_tree.fit(torch.FloatTensor(train_features), torch.LongTensor(train_labels))
 
 test_features = ([((i[0]).detach().numpy()) for i in test_dataset])
 test_labels = ([i[1] for i in test_dataset])
@@ -107,10 +102,12 @@ test_labels = ([i[1] for i in test_dataset])
 print("test_size = ", len(test_features))
 correct = 0
 for i in range(test_size):
-    predicted_result = random_forest.predict(torch.FloatTensor(test_features[i]))
-    actual_result = torch.LongTensor.item(test_labels[i])
+    print("i = ", i)
+    predicted_result = decision_tree.predict(torch.FloatTensor(test_features[i]))
+    actual_result = torch.IntTensor.item(test_labels[i])
     print("i, predicted_result, actual_result = ", i, predicted_result, actual_result)
     if predicted_result == actual_result:
         correct += 1
-print("correct = ", correct)
+        print("correct = ", correct)
+print("Total correct = ", correct)
 print("sensitivity = ", correct*100/test_size)

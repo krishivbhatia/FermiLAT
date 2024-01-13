@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import torch
 
-from decision_tree import TorchDecisionTreeClassifier, TorchDecisionTreeRegressor
-from utils import sample_vectors, sample_dimensions
+from Utils.utils import sample_vectors, sample_dimensions
+from DecisionTrees.decision_tree import TorchDecisionTreeClassifier, TorchDecisionTreeRegressor
 
 
 class TorchRandomForestClassifier(torch.nn.Module):
