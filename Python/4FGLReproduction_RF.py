@@ -19,7 +19,7 @@ from collections import OrderedDict
 from torch.utils.data import DataLoader
 from sklearn.preprocessing import StandardScaler
 
-from FGL3Dataset import FGL3Dataset
+from FGL4Dataset import FGL4Dataset
 from random_forest import TorchRandomForestClassifier
 
 
@@ -71,7 +71,7 @@ sc = StandardScaler()
 # Now we can make our dataset and dataloader
 # More on basics of dataloaders here:
 #   https://www.youtube.com/watch?v=PXOzkkB5eH0&list=PLqnslRFeH2UrcDBWF5mfPGpqQDSta6VK4&index=9
-dataset = FGL3Dataset(wanted_type_col, fluxindices, wantedtypes, wantedfeaturenames, pointsourcecatalogue)
+dataset = FGL4Dataset(wanted_type_col, fluxindices, wantedtypes, wantedfeaturenames, pointsourcecatalogue)
 print("len(dataset) = ", len(dataset))
 torch.manual_seed(42)  # Set shuffle seed to a certain value for reproducibility
 dataloader = DataLoader(dataset=dataset, shuffle=True)
@@ -95,8 +95,8 @@ dev_inputs = []
 dev_labels = []
 torch.set_default_tensor_type(torch.DoubleTensor)
 torch.manual_seed(42)
-random_forest = TorchRandomForestClassifier(100, 2500, 12)
-print("random forest = ", 100, 2500, 12)
+random_forest = TorchRandomForestClassifier(50, 2000, 10)
+print("random forest = ", 50, 2000, 10)
 train_features = ([((i[0]).detach().numpy()) for i in train_dataset])
 train_labels = ([torch.LongTensor.item(i[1]) for i in train_dataset])
 random_forest.fit(torch.FloatTensor(train_features), torch.LongTensor(train_labels))
