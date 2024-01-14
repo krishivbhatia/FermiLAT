@@ -93,7 +93,7 @@ torch.set_default_tensor_type(torch.DoubleTensor)
 torch.manual_seed(42)
 # Krishiv Bhatia: Invoke TorchDecisionTreeClassifier
 decision_tree = TorchDecisionTreeClassifier(20)
-print("TorchDecisionTreeClassifier = ", 20)
+print("TorchDecisionTreeClassifier = ", decision_tree.max_depth)
 
 # Krishiv Bhatia: split train dataset into features and labels
 train_features, train_labels = dataset_to_features_labels(train_dataset)
