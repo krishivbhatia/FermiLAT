@@ -127,3 +127,24 @@ def mean(values):
     for value in values:
         m = m + value/len(values)
     return m
+
+
+def dataset_to_features_labels(dataset):
+    # Krishiv Bhatia: train or test dataset is of the form:
+    #    tensor array(train/test features), tensor array (output label)
+    # or like this:
+    #    tensor array(feature 0, feature 1, ... feature 12), tensor array(output label)
+    # You can print it like this:
+    #     for i in train_dataset:
+    #         print(i)
+    # An example:
+    #    (tensor([  2.1602,   1.8308,   1.6083,  13.2215, -32.9276, -32.4171, -29.4589,
+    #             -32.3813, -24.3150,   0.4812,   0.0000,   2.7429,   5.4350]), tensor([1.]))
+    #
+    # Convert tensor feature array in dataset to numpy feature array
+    train_features = ([((i[0]).detach().numpy()) for i in dataset])
+    # print("train_features = ", train_features)
+    # Convert tensor label array in dataset to regular array
+    train_labels = ([torch.LongTensor.item(i[1]) for i in dataset])
+    # print("train_labels = ", train_labels)
+    return train_features, train_labels

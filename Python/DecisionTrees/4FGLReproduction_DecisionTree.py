@@ -15,6 +15,7 @@ from torch.utils.data import DataLoader
 from sklearn.preprocessing import StandardScaler
 
 from Utils.FGL4Dataset import FGL4Dataset
+from Utils.utils import dataset_to_features_labels
 from DecisionTrees.decision_tree import TorchDecisionTreeClassifier
 
 
@@ -90,15 +91,16 @@ dev_inputs = []
 dev_labels = []
 torch.set_default_tensor_type(torch.DoubleTensor)
 torch.manual_seed(42)
+# Krishiv Bhatia: Invoke TorchDecisionTreeClassifier
 decision_tree = TorchDecisionTreeClassifier(20)
 print("TorchDecisionTreeClassifier = ", 20)
-train_features = ([((i[0]).detach().numpy()) for i in train_dataset])
-train_labels = ([torch.LongTensor.item(i[1]) for i in train_dataset])
+
+# Krishiv Bhatia: split train dataset into features and labels
+train_features, train_labels = dataset_to_features_labels(train_dataset)
 decision_tree.fit(torch.FloatTensor(train_features), torch.LongTensor(train_labels))
 
-test_features = ([((i[0]).detach().numpy()) for i in test_dataset])
-test_labels = ([i[1] for i in test_dataset])
-
+# Krishiv Bhatia: split test dataset into features and labels
+test_features, test_labels = dataset_to_features_labels(test_dataset)
 print("test_size = ", len(test_features))
 correct = 0
 for i in range(test_size):

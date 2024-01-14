@@ -21,6 +21,7 @@ from sklearn.preprocessing import StandardScaler
 
 from Utils.FGL4Dataset import FGL4Dataset
 from random_forest import TorchRandomForestClassifier
+from Utils.utils import dataset_to_features_labels
 
 
 # https://www.youtube.com/watch?v=qx6y1OX4S6A Astropy for opening fits files
@@ -97,14 +98,14 @@ torch.set_default_tensor_type(torch.DoubleTensor)
 torch.manual_seed(42)
 # Krishiv Bhatia: Invoke TorchRandomForestClassifier
 random_forest = TorchRandomForestClassifier(200, 2500, 15)
-print("random forest = ", 200, 2500, 15)
-train_features = ([((i[0]).detach().numpy()) for i in train_dataset])
-train_labels = ([torch.LongTensor.item(i[1]) for i in train_dataset])
+print("random forest = ", random_forest.nb_trees, random_forest.nb_samples, random_forest.max_depth)
+
+# Krishiv Bhatia: split train dataset into features and labels
+train_features, train_labels = dataset_to_features_labels(train_dataset)
 random_forest.fit(torch.FloatTensor(train_features), torch.LongTensor(train_labels))
 
-test_features = ([((i[0]).detach().numpy()) for i in test_dataset])
-test_labels = ([i[1] for i in test_dataset])
-
+# Krishiv Bhatia: split test dataset into features and labels
+test_features, test_labels = dataset_to_features_labels(test_dataset)
 print("test_size = ", len(test_features))
 correct = 0
 for i in range(test_size):
