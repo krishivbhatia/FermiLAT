@@ -69,8 +69,7 @@ wantedfeaturenames = ["PL_Index", "LP_Index", "PLEC_IndexS", "Variability_Index"
 wantedfeatureindices = [mapkey[x] for x in wantedfeaturenames]
 # The 3FGL paper wants hardness ratios of fluxes
 # KrishivB: found only 1 in 4FGL column names. Need to know if there are more
-fluxlevels = ["Energy_Flux100"]
-fluxindices = [mapkey[x] for x in fluxlevels]
+flux_col = "Flux_Band"
 
 sc = StandardScaler()
 # Now we can make our dataset and dataloader
@@ -78,7 +77,7 @@ sc = StandardScaler()
 #   https://www.youtube.com/watch?v=PXOzkkB5eH0&list=PLqnslRFeH2UrcDBWF5mfPGpqQDSta6VK4&index=9
 # KrishivB: separated class FGL3Dataset(Dataset) into file FGL4Dataset.py and imported it
 #           Just call its constructor here
-dataset = FGL4Dataset(wanted_type_col, fluxindices, wantedtypes, wantedfeaturenames, pointsourcecatalogue)
+dataset = FGL4Dataset(wanted_type_col, flux_col, wantedtypes, wantedfeaturenames, pointsourcecatalogue)
 print("len(dataset) = ", len(dataset))
 torch.manual_seed(42)  # Set shuffle seed to a certain value for reproducibility
 dataloader = DataLoader(dataset=dataset, shuffle=True)

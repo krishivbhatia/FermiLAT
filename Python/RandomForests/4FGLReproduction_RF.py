@@ -63,16 +63,15 @@ wantedfeaturenames = ["PL_Index", "LP_Index", "PLEC_IndexS", "Variability_Index"
                       "LP_beta", "Frac_Variability", "LP_SigCurv", "Signif_Avg"]
 wantedfeatureindices = [mapkey[x] for x in wantedfeaturenames]
 # The paper wants hardness ratios of fluxes
-fluxlevels = ["Energy_Flux100"]
-fluxindices = [mapkey[x] for x in fluxlevels]
-# print("fluxindices = ", fluxindices)
+flux_col = "Flux_Band"
+
 # Pytorch Datasets and ML Models are constructed in modular class/OOP style
 
 sc = StandardScaler()
 # Now we can make our dataset and dataloader
 # More on basics of dataloaders here:
 #   https://www.youtube.com/watch?v=PXOzkkB5eH0&list=PLqnslRFeH2UrcDBWF5mfPGpqQDSta6VK4&index=9
-dataset = FGL4Dataset(wanted_type_col, fluxindices, wantedtypes, wantedfeaturenames, pointsourcecatalogue)
+dataset = FGL4Dataset(wanted_type_col, flux_col, wantedtypes, wantedfeaturenames, pointsourcecatalogue)
 print("len(dataset) = ", len(dataset))
 torch.manual_seed(42)  # Set shuffle seed to a certain value for reproducibility
 dataloader = DataLoader(dataset=dataset, shuffle=True)
@@ -97,7 +96,7 @@ dev_labels = []
 torch.set_default_tensor_type(torch.DoubleTensor)
 torch.manual_seed(42)
 # Krishiv Bhatia: Invoke TorchRandomForestClassifier
-random_forest = TorchRandomForestClassifier(200, 2500, 15)
+random_forest = TorchRandomForestClassifier(200, 500, 15)
 print("random forest = ", random_forest.nb_trees, random_forest.nb_samples, random_forest.max_depth)
 
 # Krishiv Bhatia: split train dataset into features and labels
@@ -106,13 +105,18 @@ random_forest.fit(torch.FloatTensor(train_features), torch.LongTensor(train_labe
 
 # Krishiv Bhatia: split test dataset into features and labels
 test_features, test_labels = dataset_to_features_labels(test_dataset)
+print("*** Test Features ***")
+print(test_features)
+print("*** Test Labels ***")
+print(test_labels)
 print("test_size = ", len(test_features))
 correct = 0
 for i in range(test_size):
     predicted_result = random_forest.predict(torch.FloatTensor(test_features[i]))
-    actual_result = torch.LongTensor.item(test_labels[i])
+    print("test_labels[i] = ", test_labels[i])
+    actual_result = test_labels[i]
     print("i, predicted_result, actual_result = ", i, predicted_result, actual_result)
-    if predicted_result == actual_result:
+    if int(predicted_result) == int(actual_result):
         correct += 1
 print("correct = ", correct)
 print("sensitivity = ", correct*100/test_size)

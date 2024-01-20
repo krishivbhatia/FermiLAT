@@ -58,16 +58,14 @@ wantedfeaturenames = ["PL_Index", "LP_Index", "PLEC_IndexS", "Variability_Index"
                       "LP_beta", "Frac_Variability", "LP_SigCurv", "Signif_Avg"]
 wantedfeatureindices = [mapkey[x] for x in wantedfeaturenames]
 # The paper wants hardness ratios of fluxes
-fluxlevels = ["Energy_Flux100"]
-fluxindices = [mapkey[x] for x in fluxlevels]
-# print("fluxindices = ", fluxindices)
-# Pytorch Datasets and ML Models are constructed in modular class/OOP style
+flux_col = "Flux_Band"
 
+# Pytorch Datasets and ML Models are constructed in modular class/OOP style
 sc = StandardScaler()
 # Now we can make our dataset and dataloader
 # More on basics of dataloaders here:
 #   https://www.youtube.com/watch?v=PXOzkkB5eH0&list=PLqnslRFeH2UrcDBWF5mfPGpqQDSta6VK4&index=9
-dataset = FGL4Dataset(wanted_type_col, fluxindices, wantedtypes, wantedfeaturenames, pointsourcecatalogue)
+dataset = FGL4Dataset(wanted_type_col, flux_col, wantedtypes, wantedfeaturenames, pointsourcecatalogue)
 print("len(dataset) = ", len(dataset))
 torch.manual_seed(42)  # Set shuffle seed to a certain value for reproducibility
 dataloader = DataLoader(dataset=dataset, shuffle=True)
@@ -106,9 +104,9 @@ correct = 0
 for i in range(test_size):
     print("i = ", i)
     predicted_result = decision_tree.predict(torch.FloatTensor(test_features[i]))
-    actual_result = torch.IntTensor.item(test_labels[i])
+    actual_result = test_labels[i]
     print("i, predicted_result, actual_result = ", i, predicted_result, actual_result)
-    if predicted_result == actual_result:
+    if int(predicted_result) == int(actual_result):
         correct += 1
         print("correct = ", correct)
 print("Total correct = ", correct)

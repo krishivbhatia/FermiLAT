@@ -5,41 +5,44 @@ from torch.utils.data import Dataset
 
 
 class FGL4Dataset(Dataset):
-    def __init__(self, wanted_type_col, fluxindices, wantedtypes, wantedfeaturenames, pointsourcecatalogue):
+    def __init__(self, wanted_type_col, flux_col, wanted_types, wanted_feature_names, point_source_catalogue):
         # Create x/input data
         xdata = []
         ydata = []
         # Select sources that are a part of the wanted types
-        for source in pointsourcecatalogue.data:
-            # for feature_names in wantedfeaturenames:
+        for source in point_source_catalogue.data:
+            # for feature_names in wanted_feature_names:
             #     print("{0} = {1}".format(feature_names, source[feature_names]))
-            if source[wanted_type_col] in wantedtypes:
+            # print("(type(source[flux_col]) = ", type(source[flux_col]))
+            flux_list = res = source[flux_col].tolist()
+            # print("source[flux_col] = {0}".format(flux_list))
+            if source[wanted_type_col] in wanted_types:
                 unit = []
                 # Append wanted params. Applied a log transformation to paras with highly skewed distributions.
-                unit.append(float(source[wantedfeaturenames[0]]))
-                unit.append(float(source[wantedfeaturenames[1]]))
-                unit.append(float(source[wantedfeaturenames[2]]))
-                unit.append(float(source[wantedfeaturenames[3]]))
-                unit.append(math.log(source[wantedfeaturenames[4]])
-                            if (source[wantedfeaturenames[4]] > 0) else float(source[wantedfeaturenames[4]]))
-                unit.append(math.log(source[wantedfeaturenames[5]])
-                            if (source[wantedfeaturenames[5]] > 0) else float(source[wantedfeaturenames[5]]))
-                unit.append(math.log(source[wantedfeaturenames[6]])
-                            if (source[wantedfeaturenames[6]] > 0) else float(source[wantedfeaturenames[6]]))
-                unit.append(math.log(source[wantedfeaturenames[7]])
-                            if (source[wantedfeaturenames[7]] > 0) else float(source[wantedfeaturenames[7]]))
-                unit.append(math.log(source[wantedfeaturenames[8]])
-                            if (source[wantedfeaturenames[8]] > 0) else float(source[wantedfeaturenames[8]]))
-                # unit.append(math.log(source[wantedfeaturenames[9]])
-                #             if (source[wantedfeaturenames[9]] > 0) else float(source[wantedfeaturenames[9]]))
-                unit.append(float(source[wantedfeaturenames[9]]))
-                unit.append(float(source[wantedfeaturenames[10]]))
-                unit.append(float(source[wantedfeaturenames[11]]))
-                unit.append(float(source[wantedfeaturenames[12]]))
+                unit.append(float(source[wanted_feature_names[0]]))
+                unit.append(float(source[wanted_feature_names[1]]))
+                unit.append(float(source[wanted_feature_names[2]]))
+                unit.append(float(source[wanted_feature_names[3]]))
+                unit.append(math.log(source[wanted_feature_names[4]])
+                            if (source[wanted_feature_names[4]] > 0) else float(source[wanted_feature_names[4]]))
+                unit.append(math.log(source[wanted_feature_names[5]])
+                            if (source[wanted_feature_names[5]] > 0) else float(source[wanted_feature_names[5]]))
+                unit.append(math.log(source[wanted_feature_names[6]])
+                            if (source[wanted_feature_names[6]] > 0) else float(source[wanted_feature_names[6]]))
+                unit.append(math.log(source[wanted_feature_names[7]])
+                            if (source[wanted_feature_names[7]] > 0) else float(source[wanted_feature_names[7]]))
+                unit.append(math.log(source[wanted_feature_names[8]])
+                            if (source[wanted_feature_names[8]] > 0) else float(source[wanted_feature_names[8]]))
+                # unit.append(math.log(source[wanted_feature_names[9]])
+                #             if (source[wanted_feature_names[9]] > 0) else float(source[wanted_feature_names[9]]))
+                unit.append(float(source[wanted_feature_names[9]]))
+                unit.append(float(source[wanted_feature_names[10]]))
+                unit.append(float(source[wanted_feature_names[11]]))
+                unit.append(float(source[wanted_feature_names[12]]))
                 # Calculate hardness ratios (also considered in the paper)
-                for index in range(1, len(fluxindices)):
-                    unit.append((source[fluxindices[index]] - source[fluxindices[index-1]] + 0.0) /
-                                (source[fluxindices[index]] + source[fluxindices[index-1]] + 0.0))
+                for index in range(1, len(flux_list)):
+                    unit.append((flux_list[index] - flux_list[index-1] + 0.0) /
+                                (flux_list[index] + flux_list[index-1] + 0.0))
                 xdata.append(unit)
                 if source[wanted_type_col] in ("PSR", "psr"):
                     ydata.append([0])  # 0 is for pulsar
