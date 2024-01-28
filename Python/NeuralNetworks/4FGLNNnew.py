@@ -1,0 +1,145 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Aug 10 13:15:48 2023
+
+@author: pablo
+"""
+
+import os
+import sys
+import math
+import torch
+import torch.nn as nn
+from statistics import *
+from astropy.io import fits
+import matplotlib.pyplot as plt
+from collections import OrderedDict
+from torch.utils.data import DataLoader
+from sklearn.preprocessing import StandardScaler
+
+from Utils.utils import run_iteration
+from Utils.FGL4Dataset import FGL4Dataset
+from NeuralNetwork import NeuralNetworkModel
+
+
+# https://www.youtube.com/watch?v=qx6y1OX4S6A Astropy for opening fits files
+# Use OS to find path https://www.pythoncheatsheet.org/cheatsheet/file-directory-path
+
+# KrishivB: The wanted_type_col has the wantedtypes. This is different between 3FGL and 4FGL file.
+#           Define it here and pass it to the FGL4Dataset class constructor
+wanted_type_col = 69
+# KrishivB: Modified path to 4FGL file
+path = os.path.join(os.getcwd(), "../../FITS/gll_psc_v33.fit")
+mainfile = fits.open(path)
+pointsourcecatalogue = mainfile[1]
+# print("pointsourcecatalogue.header = ", pointsourcecatalogue.header)
+# print("list(pointsourcecatalogue.header.keys() = ", list(pointsourcecatalogue.header.keys()))
+
+columns = 0
+keymap = {}
+mapkey = {}
+for key in list(pointsourcecatalogue.header.keys()):
+    if "TTYPE" in key:
+        keymap[int(key[5:len(key)])-1] = pointsourcecatalogue.header[key]
+        mapkey[pointsourcecatalogue.header[key]] = int(key[5:len(key)])-1
+        # KrishivB: Print column number, name
+        # print(columns, pointsourcecatalogue.header[key])
+        columns += 1
+# KrishivB: Print # columns. Subtract 1 for column header
+print("# columns = ", columns-1)
+# This keymap contains all the names of the corresponding column, keymap[n] contains the name of the n+1th column
+# KrishivB: keymap maps column # to name
+#           keymap =  OrderedDict([(0, 'Source_Name'), (1, 'RAJ2000'), (2, 'DEJ2000') ...
+keymap = OrderedDict(sorted(keymap.items()))
+# KrishivB: mapkey maps column name to #
+#           mapkey =  OrderedDict([('0FGL_Name', 64), ('1FGL_Name', 65), ('1FHL_Name', 67) ...
+mapkey = OrderedDict(sorted(mapkey.items()))
+print()
+
+# pointsourcecatalogue.data[a][b] corresponds with the a+1th row and b+1th column in the catalogue
+# It is recommended you open the fit file to help easily find corresponding values
+
+# Creating Training and Test Datasets
+# The paper selects these classes of objects to be apart of the dataset
+# KrishivB: Added AGN in caps
+wantedtypes = ["PSR", "psr", "YNG", "yng", "MSP", "FSRQ", "fsrq", "BLL", "bll", "BCU", "bcu", "RDG", "rdg",
+               "NLSY1", "nlsy1", "AGN", "agn", "ssrq", "sey"]
+# The 3FGL paper selects these columns/features to be the inputs that will be taken into account
+# KrishivB: Modified to 4FGL column names. Details in Abdollahi 2020 paper
+wantedfeaturenames = ["PL_Index", "LP_Index", "PLEC_IndexS", "Variability_Index", "Unc_PL_Flux_Density",
+                      "Unc_LP_Flux_Density", "Unc_Energy_Flux100", "Unc_PLEC_Flux_Density",
+                      "Unc_Flux1000", "LP_beta", "Frac_Variability", "LP_SigCurv", "Signif_Avg"]
+wantedfeatureindices = [mapkey[x] for x in wantedfeaturenames]
+# The 3FGL paper wants hardness ratios of fluxes
+# KrishivB: found only 1 in 4FGL column names. Need to know if there are more
+flux_col = "Flux_Band"
+
+sc = StandardScaler()
+# Now we can make our dataset and dataloader
+# More on basics of dataloaders here:
+#   https://www.youtube.com/watch?v=PXOzkkB5eH0&list=PLqnslRFeH2UrcDBWF5mfPGpqQDSta6VK4&index=9
+# KrishivB: separated class FGL4Dataset(Dataset) into file FGL4Dataset.py and imported it
+#           Just call its constructor here
+dataset = FGL4Dataset(wanted_type_col, flux_col, wantedtypes, wantedfeaturenames, pointsourcecatalogue)
+print("len(dataset) = ", len(dataset))
+torch.manual_seed(42)  # Set shuffle seed to a certain value for reproducibility
+dataloader = DataLoader(dataset=dataset, shuffle=True)
+# Splitting dataloader into train/dev/test sets
+train_size = int(0.7 * len(dataloader.dataset))  # You did a 70%:30% train:test split
+test_size = len(dataloader.dataset) - train_size
+train_dataset, test_dataset = torch.utils.data.random_split(dataloader.dataset, [train_size, test_size])
+print("train_size = ", train_size)
+print("test_size = ", test_size)
+print("len(dataloader) = ", len(dataloader))
+print("len(dataloader.dataset)) = ", len(dataloader.dataset))
+print("len(train_dataset) = ", len(train_dataset))
+print("len(test_dataset) = ", len(test_dataset))
+print("len(train_dataset.dataset) = ", len(train_dataset.dataset))
+
+# KrishivB: Put class LogisticRegression(nn.Module) in separate file LogisticRegression.py and imported it
+best_p_values = []
+# Training Logistic Regression Model/Model Building Procedure
+# In 10 epochs, 1 epoch will use a different final subset from one of the 10 subsets for testing
+# KrishivB: changed # of epochs here
+
+torch.set_default_tensor_type(torch.DoubleTensor)
+torch.manual_seed(82)
+NNModel = NeuralNetworkModel(train_dataset)
+# Stochastic Gradient Descent. I could use Adams but Adams is worse than regular SGD unless you
+optimizer = torch.optim.SGD(NNModel.parameters(), lr=0.0001)
+print("optimizer = ", optimizer.__class__)
+# Binary Cross Entropy Loss which is the loss method that would most likely be used in this scenario
+criterion = nn.BCELoss()
+tot_iter = 10
+print("total iterations = ", tot_iter)
+for iteration in range(0, tot_iter):
+    dev_inputs = dev_labels = []
+    print("Iteration # ", iteration)
+    total_samples = len(train_dataset)
+    # KrishivB: Put run_iteration code in utils.py, imported it, and call here
+    for epoch in range(30):
+        (dev_inputs, dev_labels) = run_iteration(NNModel, iteration, train_dataset, total_samples, criterion,
+                                                 optimizer, dev_inputs, dev_labels, True)
+correct = correct_agn = correct_psr = total_agn = total_psr = 0
+for i, (inputs, labels) in enumerate(test_dataset):
+    y_predicted = NNModel(inputs)  # Insert/fit Model for prediction here
+    predicted_item = y_predicted.data.item()
+    print("  i, y_predicted, y_predicted.data, predicted_item = ", i, y_predicted, y_predicted.data, predicted_item)
+    predicted_val = 0 if (math.isnan(predicted_item)) else round(predicted_item)
+    label_val = labels.item()
+    total_agn += 1 if label_val == 1 else 0
+    total_psr += 1 if label_val == 0 else 0
+    match = (predicted_val == label_val)
+    if match:
+        correct += 1
+        correct_agn += 1 if label_val == 1 else 0
+        correct_psr += 1  if label_val == 0 else 0
+    print("i, predicted_item, predicted_val, label_val, correct, match = ",
+          i, predicted_item, predicted_val, label_val, correct, match)
+
+print("correct, correct_agn, correct_psr = ", correct, correct_agn, correct_psr)
+print("total, total_agn, total_psr = ", len(test_dataset), total_agn, total_psr)
+print("total sensitivity = ", correct/len(test_dataset))
+print("agn sensitivity = ", correct_agn/total_agn)
+print("psr sensitivity = ", correct_psr/total_psr)

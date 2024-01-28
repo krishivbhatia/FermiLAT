@@ -8,13 +8,6 @@ from math import log, sqrt
 def run_iteration(LogRegModel, iteration, train_dataset, total_samples, criterion,
                   optimizer, dev_inputs, dev_labels, append_dev_input_label):
     for i, (inputs, labels) in enumerate(train_dataset):
-        """
-        print(type(inputs))
-        print(inputs)
-        print(type(labels))
-        print(labels)
-        print(labels.size())
-        """
         # We used nine subsets to build a model and apply the fitted model to test on the remaining subset.
         # We then repeated this procedure for all 10
         # subsets until all the subsets were tested.
