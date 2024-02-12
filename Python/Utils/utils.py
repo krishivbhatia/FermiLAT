@@ -14,6 +14,9 @@ def run_iteration(LogRegModel, iteration, train_dataset, total_samples, criterio
         if i < (iteration % 10) * math.ceil(total_samples / 10) \
                 or i >= (iteration % 10 + 1) * math.ceil(total_samples / 10):
             y_predicted = LogRegModel(inputs)  # Insert Model here
+            predicted_item = y_predicted.data.item()
+            if math.isnan(predicted_item):
+                continue
             loss = criterion(y_predicted, labels)
             # Pytorch Gradient Descent Procedure
             loss.backward()  # Backwards pass in back propagation

@@ -50,7 +50,7 @@ print()
 
 # Creating Training and Test Datasets
 # The paper selects these classes of objects to be apart of the dataset
-wantedtypes = ["PSR", "psr", "YNG", "yng", "MSP", "FSRQ", "fsrq", "BLL", "bll", "BCU", "bcu", "RDG", "rdg",
+wantedtypes = ["PSR", "psr", "YNG", "yng", "MSP", "msp", "FSRQ", "fsrq", "BLL", "bll", "BCU", "bcu", "RDG", "rdg",
                "NLSY1", "nlsy1", "AGN", "agn", "ssrq", "sey"]
 # The paper selects these columns/features to be the inputs that will be taken into account
 wantedfeaturenames = ["PL_Index", "LP_Index", "PLEC_IndexS", "Variability_Index", "Unc_PL_Flux_Density",

@@ -44,7 +44,7 @@ class FGL4Dataset(Dataset):
                     unit.append((flux_list[index] - flux_list[index-1] + 0.0) /
                                 (flux_list[index] + flux_list[index-1] + 0.0))
                 xdata.append(unit)
-                if source[wanted_type_col] in ("PSR", "psr"):
+                if source[wanted_type_col] in ("PSR", "psr", "MSP", "msp"):
                     ydata.append([0])  # 0 is for pulsar
                 else:
                     ydata.append([1])  # 1 is for AGN

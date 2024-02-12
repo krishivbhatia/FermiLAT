@@ -30,7 +30,7 @@ class FGL3Dataset(Dataset):
                 # Calculate hardness ratios (also considered in the paper)
                 for index in range(1, len(fluxindices)):
                     unit.append((source[fluxindices[index]] - source[fluxindices[index-1]] + 0.0) / (source[fluxindices[index]] + source[fluxindices[index-1]] + 0.0))
-                if source[wanted_type_col] == "PSR" or source[wanted_type_col] == "psr":
+                if source[wanted_type_col] in ("PSR", "psr", "MSP", "msp"):
                     xdata.append(unit)
                     ydata.append([0])  # 0 is for pulsar
                 elif source[wanted_type_col]:
