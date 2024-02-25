@@ -71,13 +71,15 @@ class TorchRandomForestClassifier(torch.nn.Module):
             :class:`torch.LongTensor`: Tensor which corresponds to the label predicted by the random forest.
 
         """
-        print("In Random Forest: predict()")
         predictions = []
         for tree, index_features in zip(self.trees, self.trees_features):
             sampled_vector = torch.index_select(vector, 0, index_features)
             predictions.append(tree.predict(sampled_vector))
-
-        return max(set(predictions), key=predictions.count)
+        print("predictions=", predictions)
+        print("sum(predictions)={}, len(self.trees)={}, sum(predictions)/len(self.trees)={}",
+              sum(predictions), len(self.trees), sum(predictions)/len(self.trees))
+        return sum(predictions)/len(self.trees)
+        # return max(set(predictions), key=predictions.count)
 
 
 class TorchRandomForestRegressor(torch.nn.Module):

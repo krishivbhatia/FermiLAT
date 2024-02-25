@@ -111,7 +111,7 @@ optimizer = torch.optim.SGD(LogRegModel.parameters(), lr=0.0001)
 print("optimizer = ", optimizer.__class__)
 # Binary Cross Entropy Loss which is the loss method that would most likely be used in this scenario
 criterion = nn.BCELoss()
-tot_iter = 500
+tot_iter = 15
 print("total iterations = ", tot_iter)
 for iteration in range(0, tot_iter):
     dev_inputs = dev_labels = []
@@ -134,7 +134,7 @@ for i, (inputs, labels) in enumerate(test_dataset):
     if match:
         correct += 1
         correct_agn += 1 if label_val == 1 else 0
-        correct_psr += 1  if label_val == 0 else 0
+        correct_psr += 1 if label_val == 0 else 0
     print("i, predicted_item, predicted_val, label_val, correct, match = ",
           i, predicted_item, predicted_val, label_val, correct, match)
 
