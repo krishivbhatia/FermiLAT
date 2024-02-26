@@ -95,7 +95,7 @@ dev_labels = []
 torch.set_default_tensor_type(torch.DoubleTensor)
 torch.manual_seed(42)
 # Krishiv Bhatia: Invoke TorchRandomForestClassifier
-random_forest = TorchRandomForestClassifier(250, 1500, 15)
+random_forest = TorchRandomForestClassifier(100, 2000, 15)
 print("random forest = ", random_forest.nb_trees, random_forest.nb_samples, random_forest.max_depth)
 
 # Krishiv Bhatia: split train dataset into features and labels
