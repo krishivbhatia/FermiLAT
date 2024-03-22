@@ -18,6 +18,7 @@ from torch.utils.data import DataLoader
 from sklearn.preprocessing import StandardScaler
 
 from Utils.FGL4Dataset import FGL4Dataset
+from Utils.FGL4DatasetMultiply import FGL4DatasetMultiply
 from random_forest import TorchRandomForestClassifier
 from Utils.utils import dataset_to_features, dataset_to_features_labels
 from Utils.FGL4Dataset_cls1_null import FGL4Dataset_Cls1_Null
@@ -71,7 +72,7 @@ sc = StandardScaler()
 # Now we can make our dataset and dataloader
 # More on basics of dataloaders here:
 #   https://www.youtube.com/watch?v=PXOzkkB5eH0&list=PLqnslRFeH2UrcDBWF5mfPGpqQDSta6VK4&index=9
-dataset = FGL4Dataset(wanted_type_col, flux_col, wantedtypes, wantedfeaturenames, pointsourcecatalogue)
+dataset = FGL4DatasetMultiply(wanted_type_col, flux_col, wantedtypes, wantedfeaturenames, pointsourcecatalogue)
 print("len(dataset) = ", len(dataset))
 torch.manual_seed(42)  # Set shuffle seed to a certain value for reproducibility
 dataloader = DataLoader(dataset=dataset, shuffle=True)
@@ -95,7 +96,7 @@ dev_labels = []
 torch.set_default_tensor_type(torch.DoubleTensor)
 torch.manual_seed(42)
 # Krishiv Bhatia: Invoke TorchRandomForestClassifier
-random_forest = TorchRandomForestClassifier(100, 2000, 15)
+random_forest = TorchRandomForestClassifier(20, 500, 15)
 print("random forest = ", random_forest.nb_trees, random_forest.nb_samples, random_forest.max_depth)
 
 # Krishiv Bhatia: split train dataset into features and labels
@@ -110,15 +111,32 @@ print("*** Test Labels ***")
 print(test_labels)
 print("test_size = ", len(test_features))
 correct = 0
+agn_count = psr_count = 0
+correct_agn = correct_psr = 0
 for i in range(test_size):
     predicted_result = random_forest.predict(torch.FloatTensor(test_features[i]))
     actual_result = test_labels[i]
     print("i, predicted_result, actual_result = ", i, predicted_result, actual_result)
-    if int(predicted_result) == int(actual_result):
+    print("  i, round(predicted_result), int(actual_result) = ", i, round(float(predicted_result)), int(actual_result))
+    if round(float(predicted_result)) == int(actual_result):
         correct += 1
+    if int(actual_result) == 1:
+        agn_count += 1
+        if round(float(predicted_result)) == 1:
+            correct_agn += 1
+    else:
+        psr_count += 1
+        if round(float(predicted_result)) == 0:
+            correct_psr += 1
 print("correct = ", correct)
+print("test_size = ", test_size)
+print("correct_agn = ", correct_agn)
+print("total_agn = ", agn_count)
+print("correct_psr = ", correct_psr)
+print("total_psr = ", psr_count)
 print("sensitivity = ", correct*100/test_size)
-
+print("agn_sensitivity = ", correct_agn*100/agn_count)
+print("psr_sensitivity = ", correct_psr*100/psr_count)
 print("*********************************************")
 print("Predictions for Unassociated Sources")
 print("*********************************************")

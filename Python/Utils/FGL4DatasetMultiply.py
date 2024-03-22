@@ -4,7 +4,7 @@ import numpy as np
 from torch.utils.data import Dataset
 
 
-class FGL4Dataset_Cls1_Null(Dataset):
+class FGL4DatasetMultiply(Dataset):
     def __init__(self, wanted_type_col, flux_col, wanted_types, wanted_feature_names, point_source_catalogue):
         # Create x/input data
         xdata = []
@@ -16,8 +16,7 @@ class FGL4Dataset_Cls1_Null(Dataset):
             # print("(type(source[flux_col]) = ", type(source[flux_col]))
             flux_list = res = source[flux_col].tolist()
             # print("source[flux_col] = {0}".format(flux_list))
-            # print("source[wanted_type_col] = ", source[wanted_type_col])
-            if source[wanted_type_col] == '':
+            if source[wanted_type_col] in wanted_types:
                 unit = []
                 # Append wanted params. Applied a log transformation to paras with highly skewed distributions.
                 unit.append(float(source[wanted_feature_names[0]]))
@@ -45,13 +44,21 @@ class FGL4Dataset_Cls1_Null(Dataset):
                     unit.append((flux_list[index] - flux_list[index-1] + 0.0) /
                                 (flux_list[index] + flux_list[index-1] + 0.0))
                 xdata.append(unit)
+                if source[wanted_type_col] in ("PSR", "psr", "MSP", "msp"):
+                    ydata.append([0])  # 0 is for pulsar
+                else:
+                    ydata.append([1])  # 1 is for AGN
+                # Multiply Pulsar rows by 10. Create 9 more rows for each Pulsar row
+                if source[wanted_type_col] in ("PSR", "psr", "MSP", "msp"):
+                    for i in range(11):
+                        xdata.append(unit)
+                        ydata.append([0])  # 0 is for pulsar
         self.x = torch.from_numpy(np.array(xdata, float))
         self.y = torch.from_numpy(np.array(ydata, float))
-        self.x = torch.from_numpy(np.array(xdata, float))
         self.size = len(xdata)
 
     def __getitem__(self, index):
-        return self.x[index]
+        return self.x[index], self.y[index]
 
     def __len__(self):
         return self.size
