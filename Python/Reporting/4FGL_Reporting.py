@@ -25,9 +25,9 @@ from Utils.FGL4Dataset_Reporting import FGL4Dataset_Reporting
 
 # KrishivB: The wanted_type_col has the wantedtypes. This is different between 3FGL and 4FGL file.
 #           Define it here and pass it to the FGL4Dataset class constructor
-wanted_type_col = 70
+wanted_type_col = 65
 # KrishivB: Modified path to 4FGL file
-path = os.path.join(os.getcwd(), "../../FITS/gll_psc_v33_4FGL_DR4.fit")
+path = os.path.join(os.getcwd(), "../../FITS/gll_psc_v27_4FGL_DR2.fit")
 mainfile = fits.open(path)
 point_source_catalogue = mainfile[1]
 # print("pointsourcecatalogue.header = ", pointsourcecatalogue.header)

@@ -13,7 +13,7 @@ class FGL4Dataset_Reporting(Dataset):
         all_cnt = null_cnt = agn_cnt = AGN_cnt = psr_cnt = PSR_cnt = 0
         msp_cnt = MSP_cnt = fsrq_cnt = FSRQ_cnt = bll_cnt = BLL_cnt = bcu_cnt = BCU_cnt = 0
         RDG_cnt = rdg_cnt = NLSY1_cnt = nlsy1_cnt = YNG_cnt = yng_cnt = ssrq_cnt = sey_cnt = 0
-        unk_cnt = bin_cnt = glc_cnt = sbg_cnt = 0
+        unk_cnt = bin_cnt = glc_cnt = sbg_cnt = clust_cnt = 0
         for source in point_source_catalogue.data:
             # for feature_names in wanted_feature_names:
             #     print("{0} = {1}".format(feature_names, source[feature_names]))
@@ -73,6 +73,8 @@ class FGL4Dataset_Reporting(Dataset):
                     glc_cnt += 1
                 elif source[wanted_type_col] == 'sbg':
                     sbg_cnt += 1
+                elif source[wanted_type_col] == 'clust':
+                    clust_cnt += 1
                 else:
                     print("missing = ", source[wanted_type_col])
         print("all_cnt = ", all_cnt)
@@ -101,6 +103,7 @@ class FGL4Dataset_Reporting(Dataset):
         print("null_cnt = ", null_cnt)
         print("glc_cnt = ", glc_cnt)
         print("sbg_cnt = ", sbg_cnt)
+        print("clust_cnt = ", clust_cnt)
 
         # create data
         df1 = pd.DataFrame([
@@ -116,10 +119,10 @@ class FGL4Dataset_Reporting(Dataset):
         df3 = pd.DataFrame([
             ['Total', all_cnt, null_cnt, psr_cnt+msp_cnt+PSR_cnt+MSP_cnt,
              AGN_cnt+agn_cnt+FSRQ_cnt+fsrq_cnt+BLL_cnt+bll_cnt+BCU_cnt+bcu_cnt+RDG_cnt+rdg_cnt+NLSY1_cnt+nlsy1_cnt+YNG_cnt+yng_cnt+ssrq_cnt+sey_cnt,
-             unk_cnt, bin_cnt, glc_cnt, sbg_cnt,
+             unk_cnt, bin_cnt, glc_cnt, sbg_cnt, clust_cnt,
              ]],
             columns=[
-                'Total', 'All', 'Null count', 'PSR', 'AGN', 'UNK', 'BIN', 'GLC', 'SBG'])
+                'Total', 'All', 'Null count', 'PSR', 'AGN', 'UNK', 'BIN', 'GLC', 'SBG', 'CLUST'])
 
         # plot grouped bar chart
         ax1 = df1.plot(
