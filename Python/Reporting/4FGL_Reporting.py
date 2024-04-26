@@ -10,10 +10,9 @@ import os
 import sys
 import math
 import torch
-import torch.nn as nn
 import pandas as pd
+import torch.nn as nn
 from astropy.io import fits
-import matplotlib.pyplot as plt
 from collections import OrderedDict
 from torch.utils.data import DataLoader
 
@@ -25,9 +24,20 @@ from Utils.FGL4Dataset_Reporting import FGL4Dataset_Reporting
 
 # KrishivB: The wanted_type_col has the wantedtypes. This is different between 3FGL and 4FGL file.
 #           Define it here and pass it to the FGL4Dataset class constructor
-wanted_type_col = 65
+# for 4FGL_DR4, 4FGL_DR3
+# wanted_type_col
+#   69 (4FGL_DR4, 4FGL_DR3), 64 (4FGL_DR2), 74 (4FGL_DR1)
+#   73 (3FGL), 63 (2FGL), 54 (1FGL), 17 (BSL)
+wanted_type_col = 74
 # KrishivB: Modified path to 4FGL file
-path = os.path.join(os.getcwd(), "../../FITS/gll_psc_v27_4FGL_DR2.fit")
+# path = os.path.join(os.getcwd(), "../../FITS/gll_psc3month_BSL_v2.fit")
+# path = os.path.join(os.getcwd(), "../../FITS/gll_psc_v03_1FGL.fit")
+# path = os.path.join(os.getcwd(), "../../FITS/gll_psc_v09_2FGL.fit")
+# path = os.path.join(os.getcwd(), "../../FITS/gll_psc_v16.fit")
+path = os.path.join(os.getcwd(), "../../FITS/gll_psc_v22_4FGL_DR1.fit")
+# path = os.path.join(os.getcwd(), "../../FITS/gll_psc_v27_4FGL_DR2.fit")
+# path = os.path.join(os.getcwd(), "../../FITS/gll_psc_v31_4FGL_DR3.fit")
+# path = os.path.join(os.getcwd(), "../../FITS/gll_psc_v33_4FGL_DR4.fit")
 mainfile = fits.open(path)
 point_source_catalogue = mainfile[1]
 # print("pointsourcecatalogue.header = ", pointsourcecatalogue.header)
@@ -73,4 +83,3 @@ agn_types = list(set(all_types) - set(psr_types))
 # KrishivB: separated class FGL4Dataset(Dataset) into file FGL4Dataset.py and imported it
 #           Just call its constructor here
 dataset = FGL4Dataset_Reporting(point_source_catalogue, wanted_type_col, all_types, psr_types, agn_types)
-plt.show()
