@@ -15,7 +15,7 @@ import torch.nn as nn
 from astropy.io import fits
 from collections import OrderedDict
 from torch.utils.data import DataLoader
-from Utils.FGL4Dataset_Reporting1 import FGL4Dataset_Process
+from Utils.FGL4Dataset_Processing import FGL4Dataset_Process
 
 
 def intersection(lst1, lst2):
