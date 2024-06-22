@@ -15,7 +15,7 @@ import torch.nn as nn
 from astropy.io import fits
 from collections import OrderedDict
 from torch.utils.data import DataLoader
-from Utils.FGL4Dataset_Reporting1 import FGL4Dataset_Rept
+from Utils.FGL4Dataset_Reporting1 import FGL4Dataset_Process
 
 
 def intersection(lst1, lst2):
@@ -25,18 +25,45 @@ def intersection(lst1, lst2):
 # wanted_type_col
 #   69 (4FGL_DR4, 4FGL_DR3), 64 (4FGL_DR2), 74 (4FGL_DR1)
 #   73 (3FGL), 63 (2FGL), 54 (1FGL), 17 (BSL)
-wanted_type_col = 17
-path = os.path.join(os.getcwd(), "../../FITS/gll_psc3month_BSL_v2.fit")
+# path = os.path.join(os.getcwd(), "../../FITS/gll_psc3month_BSL_v2.fit")
 # path = os.path.join(os.getcwd(), "../../FITS/gll_psc_v03_1FGL.fit")
 # path = os.path.join(os.getcwd(), "../../FITS/gll_psc_v09_2FGL.fit")
 # path = os.path.join(os.getcwd(), "../../FITS/gll_psc_v16.fit")
 # path = os.path.join(os.getcwd(), "../../FITS/gll_psc_v22_4FGL_DR1.fit")
 # path = os.path.join(os.getcwd(), "../../FITS/gll_psc_v27_4FGL_DR2.fit")
 # path = os.path.join(os.getcwd(), "../../FITS/gll_psc_v31_4FGL_DR3.fit")
-# path = os.path.join(os.getcwd(), "../../FITS/gll_psc_v33_4FGL_DR4.fit")
+# path = os.path.join(os.getcwd(), "../../FITS/gll_psc_v33_4FGL_DR4.fit")]
+
+# Read BSL file
+print("=====================BSL=======================")
+path = os.path.join(os.getcwd(), "../../FITS/gll_psc3month_BSL_v2.fit")
 mainfile = fits.open(path)
 point_source_catalogue = mainfile[1]
+columns = 0
+keymap = {}
+mapkey = {}
+for key in list(point_source_catalogue.header.keys()):
+    if "TTYPE" in key:
+        keymap[int(key[5:len(key)])-1] = point_source_catalogue.header[key]
+        mapkey[point_source_catalogue.header[key]] = int(key[5:len(key)])-1
+        # print(columns, key, point_source_catalogue.headeddr[key])
+        columns += 1
+keymap = OrderedDict(sorted(keymap.items()))
+mapkey = OrderedDict(sorted(mapkey.items()))
 
+# Get BSL dataset
+wanted_type_col = 17 # class1
+dataset = FGL4Dataset_Process(point_source_catalogue, wanted_type_col, [])
+bsl_list = dataset.get_all_list()
+# Convert into dataframe
+bsl_df = pd.DataFrame(bsl_list, columns=["BSL", "CLASS1-BSL"])
+# Save into csv
+bsl_df.to_csv('../../CSV/bsl_df.csv')
+
+print("=====================1FGL=======================")
+path = os.path.join(os.getcwd(), "../../FITS/gll_psc_v03_1FGL.fit")
+mainfile = fits.open(path)
+point_source_catalogue = mainfile[1]
 columns = 0
 keymap = {}
 mapkey = {}
@@ -46,50 +73,18 @@ for key in list(point_source_catalogue.header.keys()):
         mapkey[point_source_catalogue.header[key]] = int(key[5:len(key)])-1
         # print(columns, key, point_source_catalogue.header[key])
         columns += 1
-keymap = OrderedDict(sorted(keymap.items()))
-mapkey = OrderedDict(sorted(mapkey.items()))
-print()
 
-# BSL
-print("===============BSL===================")
-dataset = FGL4Dataset_Rept(point_source_catalogue, wanted_type_col, [])
-bsl_list = dataset.get_all_list()
-bsl_df = pd.DataFrame(bsl_list, columns=["BSL", "CLASS1-BSL"])
-print("len(bsl_df) = ", len(bsl_df))
-bsl_df.to_csv('../../CSV/bsl_df.csv')
-
-print("=====================1FGL=======================")
-wanted_type_col = 54
-path = os.path.join(os.getcwd(), "../../FITS/gll_psc_v03_1FGL.fit")
-mainfile = fits.open(path)
-point_source_catalogue = mainfile[1]
-for key in list(point_source_catalogue.header.keys()):
-    if "TTYPE" in key:
-        keymap[int(key[5:len(key)])-1] = point_source_catalogue.header[key]
-        mapkey[point_source_catalogue.header[key]] = int(key[5:len(key)])-1
-        # print(columns, key, point_source_catalogue.header[key])
-        columns += 1
-
- # col 49 is 0FGL_Name:  78 TTYPE50 0FGL_Name
-dataset = FGL4Dataset_Rept(point_source_catalogue, wanted_type_col, [49])
+# col 49 is 0FGL_Name:  78 TTYPE50 0FGL_Name
+wanted_type_col = 54  # Class1
+dataset = FGL4Dataset_Process(point_source_catalogue, wanted_type_col, [49])
 fgl1_lst = dataset.get_all_list()
 fgl1_df = pd.DataFrame(fgl1_lst, columns = ["1FGL", "CLASS1-1FGL", "1FGL-BSL"])
-print("len(fgl1_df_null_cls1) = ", len(fgl1_df))
-print("------------------------------------")
-print(fgl1_df[fgl1_df["1FGL-BSL"] != ''])
 fgl1_df.to_csv('../../CSV/fgl1_df.csv')
 
-print("=========================Merge-BSL-1FGL=========================")
-joined_BSL_1FGL = pd.merge(bsl_df, fgl1_df, left_on='BSL', right_on='1FGL-BSL', how='left')
-print("len(result) = ", len(joined_BSL_1FGL))
-joined_BSL_1FGL.to_csv('../../CSV/joined_BSL_1FGL.csv')
-print("------------------------------------")
-joined_BSL_1FGL_None_CLS1BSL = joined_BSL_1FGL[joined_BSL_1FGL["CLASS1-BSL"]=='']
-print(len(joined_BSL_1FGL_None_CLS1BSL))
-joined_BSL_1FGL_None_CLS1BSL.to_csv('../../CSV/joined_BSL_1FGL_NoneCLS1_BSL.csv')
-
 print("=====================2FGL=======================")
-wanted_type_col = 63
+columns = 0
+keymap = {}
+mapkey = {}
 path = os.path.join(os.getcwd(), "../../FITS/gll_psc_v09_2FGL.fit")
 mainfile = fits.open(path)
 point_source_catalogue = mainfile[1]
@@ -101,18 +96,20 @@ for key in list(point_source_catalogue.header.keys()):
         columns += 1
 
 # 145 TTYPE57 0FGL_Name, 146 TTYPE58 1FGL_Name
-dataset = FGL4Dataset_Rept(point_source_catalogue, wanted_type_col, [56,57])
+wanted_type_col = 63 # class1
+dataset = FGL4Dataset_Process(point_source_catalogue, wanted_type_col, [56,57])
 fgl2_lst = dataset.get_all_list()
 fgl2_df = pd.DataFrame(fgl2_lst, columns = ["2FGL", "CLASS1-2FGL", "2FGL-BSL", "2FGL-1FGL"])
-print("len(fgl2_df_null_cls1) = ", len(fgl2_df))
 fgl2_df.to_csv('../../CSV/fgl2_df.csv')
+
+print("=========================Merge-BSL-1FGL=========================")
+joined_BSL_1FGL = pd.merge(bsl_df, fgl1_df, left_on='BSL', right_on='1FGL-BSL', how='left')
+joined_BSL_1FGL.to_csv('../../CSV/joined_BSL_1FGL.csv')
+joined_BSL_1FGL_None_CLS1BSL = joined_BSL_1FGL[joined_BSL_1FGL["CLASS1-BSL"]=='']
+joined_BSL_1FGL_None_CLS1BSL.to_csv('../../CSV/joined_BSL_1FGL_NoneCLS1_BSL.csv')
 
 print("=========================Merge BSL, 1FGL, 2FGL=========================")
 joined_BSL_1FGL_2FGL = pd.merge(joined_BSL_1FGL, fgl2_df, left_on='BSL', right_on='2FGL-BSL', how='left')
-print("len(result) = ", len(joined_BSL_1FGL_2FGL))
 joined_BSL_1FGL_2FGL.to_csv('../../CSV/joined_BSL_1FGL_2FGL.csv')
-print("------------------------------------")
 joined_BSL_1FGL_2FGL_NONE_CLS1_BSL = joined_BSL_1FGL_2FGL[joined_BSL_1FGL_2FGL["CLASS1-BSL"]=='']
-print(joined_BSL_1FGL_2FGL_NONE_CLS1_BSL)
-print(len(joined_BSL_1FGL_2FGL_NONE_CLS1_BSL))
 joined_BSL_1FGL_2FGL_NONE_CLS1_BSL.to_csv('../../CSV/joined_BSL_1FGL_2FGL_NONE_CS1_BSL.csv')
