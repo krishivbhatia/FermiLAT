@@ -15,33 +15,27 @@ import torch.nn as nn
 from astropy.io import fits
 from collections import OrderedDict
 from torch.utils.data import DataLoader
+from Utils.FGL4Dataset_Reporting1 import FGL4Dataset_Rept
 
-from Utils.FGL4Dataset_Reporting import FGL4Dataset_Reporting
 
+def intersection(lst1, lst2):
+    lst3 = [value for value in lst1 if value in lst2]
+    return lst3
 
-# https://www.youtube.com/watch?v=qx6y1OX4S6A Astropy for opening fits files
-# Use OS to find path https://www.pythoncheatsheet.org/cheatsheet/file-directory-path
-
-# KrishivB: The wanted_type_col has the wantedtypes. This is different between 3FGL and 4FGL file.
-#           Define it here and pass it to the FGL4Dataset class constructor
-# for 4FGL_DR4, 4FGL_DR3
 # wanted_type_col
 #   69 (4FGL_DR4, 4FGL_DR3), 64 (4FGL_DR2), 74 (4FGL_DR1)
 #   73 (3FGL), 63 (2FGL), 54 (1FGL), 17 (BSL)
-wanted_type_col = 74
-# KrishivB: Modified path to 4FGL file
-# path = os.path.join(os.getcwd(), "../../FITS/gll_psc3month_BSL_v2.fit")
+wanted_type_col = 17
+path = os.path.join(os.getcwd(), "../../FITS/gll_psc3month_BSL_v2.fit")
 # path = os.path.join(os.getcwd(), "../../FITS/gll_psc_v03_1FGL.fit")
 # path = os.path.join(os.getcwd(), "../../FITS/gll_psc_v09_2FGL.fit")
 # path = os.path.join(os.getcwd(), "../../FITS/gll_psc_v16.fit")
-path = os.path.join(os.getcwd(), "../../FITS/gll_psc_v22_4FGL_DR1.fit")
+# path = os.path.join(os.getcwd(), "../../FITS/gll_psc_v22_4FGL_DR1.fit")
 # path = os.path.join(os.getcwd(), "../../FITS/gll_psc_v27_4FGL_DR2.fit")
 # path = os.path.join(os.getcwd(), "../../FITS/gll_psc_v31_4FGL_DR3.fit")
 # path = os.path.join(os.getcwd(), "../../FITS/gll_psc_v33_4FGL_DR4.fit")
 mainfile = fits.open(path)
 point_source_catalogue = mainfile[1]
-# print("pointsourcecatalogue.header = ", pointsourcecatalogue.header)
-# print("list(pointsourcecatalogue.header.keys() = ", list(pointsourcecatalogue.header.keys()))
 
 columns = 0
 keymap = {}
@@ -50,36 +44,75 @@ for key in list(point_source_catalogue.header.keys()):
     if "TTYPE" in key:
         keymap[int(key[5:len(key)])-1] = point_source_catalogue.header[key]
         mapkey[point_source_catalogue.header[key]] = int(key[5:len(key)])-1
-        # KrishivB: Print column number, name
-        print(columns, key, point_source_catalogue.header[key])
+        # print(columns, key, point_source_catalogue.header[key])
         columns += 1
-# KrishivB: Print # columns. Subtract 1 for column header
-print("# columns = ", columns-1)
-# This keymap contains all the names of the corresponding column, keymap[n] contains the name of the n+1th column
-# KrishivB: keymap maps column # to name
-#           keymap =  OrderedDict([(0, 'Source_Name'), (1, 'RAJ2000'), (2, 'DEJ2000') ...
 keymap = OrderedDict(sorted(keymap.items()))
-# KrishivB: mapkey maps column name to #
-#           mapkey =  OrderedDict([('0FGL_Name', 64), ('1FGL_Name', 65), ('1FHL_Name', 67) ...
 mapkey = OrderedDict(sorted(mapkey.items()))
 print()
 
-# pointsourcecatalogue.data[a][b] corresponds with the a+1th row and b+1th column in the catalogue
-# It is recommended you open the fit file to help easily find corresponding values
+# BSL
+print("===============BSL===================")
+dataset = FGL4Dataset_Rept(point_source_catalogue, wanted_type_col, [])
+bsl_list = dataset.get_all_list()
+bsl_df = pd.DataFrame(bsl_list, columns=["BSL", "CLASS1-BSL"])
+print("len(bsl_df) = ", len(bsl_df))
+bsl_df.to_csv('../../CSV/bsl_df.csv')
 
-# Creating Training and Test Datasets
-# The paper selects these classes of objects to be apart of the dataset
-# KrishivB: Added AGN in caps
-all_types = ["PSR", "psr", "YNG", "yng", "MSP", "msp", "FSRQ", "fsrq", "BLL", "bll", "BCU", "bcu", "RDG", "rdg",
-               "NLSY1", "nlsy1", "AGN", "agn", "ssrq", "sey"]
-psr_types =  ["PSR", "psr", "MSP", "msp"]
-agn_types = list(set(all_types) - set(psr_types))
-# The 3FGL paper selects these columns/features to be the inputs that will be taken into account
-# KrishivB: Modified to 4FGL column names. Details in Abdollahi 2020 paper
+print("=====================1FGL=======================")
+wanted_type_col = 54
+path = os.path.join(os.getcwd(), "../../FITS/gll_psc_v03_1FGL.fit")
+mainfile = fits.open(path)
+point_source_catalogue = mainfile[1]
+for key in list(point_source_catalogue.header.keys()):
+    if "TTYPE" in key:
+        keymap[int(key[5:len(key)])-1] = point_source_catalogue.header[key]
+        mapkey[point_source_catalogue.header[key]] = int(key[5:len(key)])-1
+        # print(columns, key, point_source_catalogue.header[key])
+        columns += 1
 
-# Now we can make our dataset and dataloader
-# More on basics of dataloaders here:
-#   https://www.youtube.com/watch?v=PXOzkkB5eH0&list=PLqnslRFeH2UrcDBWF5mfPGpqQDSta6VK4&index=9
-# KrishivB: separated class FGL4Dataset(Dataset) into file FGL4Dataset.py and imported it
-#           Just call its constructor here
-dataset = FGL4Dataset_Reporting(point_source_catalogue, wanted_type_col, all_types, psr_types, agn_types)
+ # col 49 is 0FGL_Name:  78 TTYPE50 0FGL_Name
+dataset = FGL4Dataset_Rept(point_source_catalogue, wanted_type_col, [49])
+fgl1_lst = dataset.get_all_list()
+fgl1_df = pd.DataFrame(fgl1_lst, columns = ["1FGL", "CLASS1-1FGL", "1FGL-BSL"])
+print("len(fgl1_df_null_cls1) = ", len(fgl1_df))
+print("------------------------------------")
+print(fgl1_df[fgl1_df["1FGL-BSL"] != ''])
+fgl1_df.to_csv('../../CSV/fgl1_df.csv')
+
+print("=========================Merge-BSL-1FGL=========================")
+joined_BSL_1FGL = pd.merge(bsl_df, fgl1_df, left_on='BSL', right_on='1FGL-BSL', how='left')
+print("len(result) = ", len(joined_BSL_1FGL))
+joined_BSL_1FGL.to_csv('../../CSV/joined_BSL_1FGL.csv')
+print("------------------------------------")
+joined_BSL_1FGL_None_CLS1BSL = joined_BSL_1FGL[joined_BSL_1FGL["CLASS1-BSL"]=='']
+print(len(joined_BSL_1FGL_None_CLS1BSL))
+joined_BSL_1FGL_None_CLS1BSL.to_csv('../../CSV/joined_BSL_1FGL_NoneCLS1_BSL.csv')
+
+print("=====================2FGL=======================")
+wanted_type_col = 63
+path = os.path.join(os.getcwd(), "../../FITS/gll_psc_v09_2FGL.fit")
+mainfile = fits.open(path)
+point_source_catalogue = mainfile[1]
+for key in list(point_source_catalogue.header.keys()):
+    if "TTYPE" in key:
+        keymap[int(key[5:len(key)])-1] = point_source_catalogue.header[key]
+        mapkey[point_source_catalogue.header[key]] = int(key[5:len(key)])-1
+        # print(columns, key, point_source_catalogue.header[key])
+        columns += 1
+
+# 145 TTYPE57 0FGL_Name, 146 TTYPE58 1FGL_Name
+dataset = FGL4Dataset_Rept(point_source_catalogue, wanted_type_col, [56,57])
+fgl2_lst = dataset.get_all_list()
+fgl2_df = pd.DataFrame(fgl2_lst, columns = ["2FGL", "CLASS1-2FGL", "2FGL-BSL", "2FGL-1FGL"])
+print("len(fgl2_df_null_cls1) = ", len(fgl2_df))
+fgl2_df.to_csv('../../CSV/fgl2_df.csv')
+
+print("=========================Merge BSL, 1FGL, 2FGL=========================")
+joined_BSL_1FGL_2FGL = pd.merge(joined_BSL_1FGL, fgl2_df, left_on='BSL', right_on='2FGL-BSL', how='left')
+print("len(result) = ", len(joined_BSL_1FGL_2FGL))
+joined_BSL_1FGL_2FGL.to_csv('../../CSV/joined_BSL_1FGL_2FGL.csv')
+print("------------------------------------")
+joined_BSL_1FGL_2FGL_NONE_CLS1_BSL = joined_BSL_1FGL_2FGL[joined_BSL_1FGL_2FGL["CLASS1-BSL"]=='']
+print(joined_BSL_1FGL_2FGL_NONE_CLS1_BSL)
+print(len(joined_BSL_1FGL_2FGL_NONE_CLS1_BSL))
+joined_BSL_1FGL_2FGL_NONE_CLS1_BSL.to_csv('../../CSV/joined_BSL_1FGL_2FGL_NONE_CS1_BSL.csv')
