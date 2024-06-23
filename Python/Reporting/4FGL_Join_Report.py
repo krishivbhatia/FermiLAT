@@ -102,6 +102,28 @@ fgl2_lst = dataset.get_all_list()
 fgl2_df = pd.DataFrame(fgl2_lst, columns = ["2FGL", "CLASS1-2FGL", "2FGL-BSL", "2FGL-1FGL"])
 fgl2_df.to_csv('../../CSV/fgl2_df.csv')
 
+print("=====================3FGL=======================")
+columns = 0
+keymap = {}
+mapkey = {}
+path = os.path.join(os.getcwd(), "../../FITS/gll_psc_v16.fit")
+mainfile = fits.open(path)
+point_source_catalogue = mainfile[1]
+for key in list(point_source_catalogue.header.keys()):
+    if "TTYPE" in key:
+        keymap[int(key[5:len(key)])-1] = point_source_catalogue.header[key]
+        mapkey[point_source_catalogue.header[key]] = int(key[5:len(key)])-1
+        print(columns, key, point_source_catalogue.header[key])
+        columns += 1
+
+# TTYPE65 0FGL_Name, TTYPE66 1FGL_Name, TTYPE67 2FGL_Name
+wanted_type_col = 73 # class1
+dataset = FGL4Dataset_Process(point_source_catalogue, wanted_type_col, [64,65,66])
+fgl3_lst = dataset.get_all_list()
+fgl3_df = pd.DataFrame(fgl3_lst, columns = ["3FGL", "CLASS1-3FGL", "3FGL-BSL", "3FGL-1FGL",
+                                            "3FGL-2FGL"])
+fgl3_df.to_csv('../../CSV/fgl3_df.csv')
+
 print("=========================Merge-BSL-1FGL=========================")
 joined_BSL_1FGL = pd.merge(bsl_df, fgl1_df, left_on='BSL', right_on='1FGL-BSL', how='left')
 joined_BSL_1FGL.to_csv('../../CSV/joined_BSL_1FGL.csv')
@@ -113,3 +135,10 @@ joined_BSL_1FGL_2FGL = pd.merge(joined_BSL_1FGL, fgl2_df, left_on='BSL', right_o
 joined_BSL_1FGL_2FGL.to_csv('../../CSV/joined_BSL_1FGL_2FGL.csv')
 joined_BSL_1FGL_2FGL_NONE_CLS1_BSL = joined_BSL_1FGL_2FGL[joined_BSL_1FGL_2FGL["CLASS1-BSL"]=='']
 joined_BSL_1FGL_2FGL_NONE_CLS1_BSL.to_csv('../../CSV/joined_BSL_1FGL_2FGL_NONE_CS1_BSL.csv')
+
+print("=========================Merge BSL, 1FGL, 2FGL, with 3FGL=========================")
+joined_BSL_1FGL_2FGL_3FGL = pd.merge(joined_BSL_1FGL_2FGL, fgl3_df, left_on='BSL',
+                                     right_on='3FGL-BSL', how='left')
+joined_BSL_1FGL_2FGL_3FGL.to_csv('../../CSV/joined_BSL_1FGL_2FGL_3FGL.csv')
+joined_BSL_1FGL_2FGL_3FGL_NONE_CLS1_BSL = joined_BSL_1FGL_2FGL_3FGL[joined_BSL_1FGL_2FGL_3FGL["CLASS1-BSL"]=='']
+joined_BSL_1FGL_2FGL_3FGL_NONE_CLS1_BSL.to_csv('../../CSV/joined_BSL_1FGL_2FGL_3FGL_NONE_CLS1_BSL.csv')
