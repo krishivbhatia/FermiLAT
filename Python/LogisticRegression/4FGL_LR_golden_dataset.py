@@ -11,6 +11,7 @@ import sys
 import math
 import torch
 import torch.nn as nn
+import pandas as pd
 from statistics import *
 from astropy.io import fits
 import matplotlib.pyplot as plt
@@ -19,8 +20,9 @@ from torch.utils.data import DataLoader
 from sklearn.preprocessing import StandardScaler
 
 from Utils.utils import run_iteration
-from Utils.FGL4_GoldenDataset import FGL4_GoldenDataset
 from LogisticRegression import LogisticRegression
+from Utils.FGL4_GoldenDataset import FGL4_GoldenDataset
+from Utils.FGL4Dataset_cls1_null import FGL4Dataset_Cls1_Null
 
 
 # https://www.youtube.com/watch?v=qx6y1OX4S6A Astropy for opening fits files
@@ -89,7 +91,7 @@ print("len(dataset) = ", len(dataset))
 torch.manual_seed(42)  # Set shuffle seed to a certain value for reproducibility
 dataloader = DataLoader(dataset=dataset, shuffle=True)
 # Splitting dataloader into train/dev/test sets
-train_size = int(0.7 * len(dataloader.dataset))  # You did a 70%:30% train:test split
+train_size = int(0.95 * len(dataloader.dataset))  # You did a 70%:30% train:test split
 test_size = len(dataloader.dataset) - train_size
 train_dataset, test_dataset = torch.utils.data.random_split(dataloader.dataset, [train_size, test_size])
 print("train_size = ", train_size)
@@ -114,7 +116,7 @@ optimizer = torch.optim.SGD(LogRegModel.parameters(), lr=0.0001)
 print("optimizer = ", optimizer.__class__)
 # Binary Cross Entropy Loss which is the loss method that would most likely be used in this scenario
 criterion = nn.BCELoss()
-tot_iter = 15
+tot_iter = 50
 print("total iterations = ", tot_iter)
 for iteration in range(0, tot_iter):
     dev_inputs = dev_labels = []
@@ -146,3 +148,90 @@ print("total, total_agn, total_psr = ", len(test_dataset), total_agn, total_psr)
 print("total sensitivity = ", correct/len(test_dataset))
 print("agn sensitivity = ", correct_agn/total_agn)
 print("psr sensitivity = ", correct_psr/total_psr)
+
+print("*********************************************")
+print("Predictions for Unassociated Sources")
+print("*********************************************")
+unassociated_agn = 0
+unassociated_agn_05_06 = 0
+unassociated_agn_06_07 = 0
+unassociated_agn_07_08 = 0
+unassociated_agn_08_09 = 0
+unassociated_agn_09_095 = 0
+unassociated_agn_095_10 = 0
+unassociated_psr = 0
+unassociated_psr_00_005 = 0
+unassociated_psr_005_01 = 0
+unassociated_psr_01_02 = 0
+unassociated_psr_02_03 = 0
+unassociated_psr_03_04 = 0
+unassociated_psr_04_05 = 0
+cls1_none_dataset = FGL4Dataset_Cls1_Null(wanted_type_col, flux_col, wantedtypes, wantedfeaturenames, pointsourcecatalogue)
+print("len(cls1_none_dataset) = ", cls1_none_dataset.size)
+cls1_none_dataloader = DataLoader(dataset=cls1_none_dataset, shuffle=True)
+print("cls1_none_dataloader.dataset size=", len(cls1_none_dataloader.dataset))
+train_dataset, test_dataset = torch.utils.data.random_split(cls1_none_dataloader.dataset, [0, len(cls1_none_dataloader.dataset)])
+print("test_dataset size=", len(test_dataset))
+for i, inputs in enumerate(test_dataset):
+    y_predicted = LogRegModel(inputs)  # Insert/fit Model for prediction here
+    predicted_item = y_predicted.data.item()
+    print("i, y_predicted, y_predicted.data, predicted_item = ", i, y_predicted, y_predicted.data, predicted_item)
+    predicted_val = 0 if (math.isnan(predicted_item)) else round(predicted_item)
+    print("  i, predicted_item, predicted_val = ", i, predicted_item, predicted_val)
+    if predicted_val == 1:
+        unassociated_agn += 1
+        if predicted_item >= 0.95:
+            unassociated_agn_095_10 += 1
+        elif predicted_item >= 0.9:
+            unassociated_agn_09_095 += 1
+        elif predicted_item >= 0.8:
+            unassociated_agn_08_09 += 1
+        elif predicted_item >= 0.7:
+            unassociated_agn_07_08 += 1
+        elif predicted_item >= 0.6:
+            unassociated_agn_06_07 += 1
+        else:
+            unassociated_agn_05_06 += 1
+    if predicted_val == 0:
+        unassociated_psr += 1
+        if predicted_item >= 0.4:
+            unassociated_psr_04_05 += 1
+        elif predicted_item >= 0.3:
+            unassociated_psr_03_04 += 1
+        elif predicted_item >= 0.2:
+            unassociated_psr_02_03 += 1
+        elif predicted_item >= 0.1:
+            unassociated_psr_01_02 += 1
+        elif predicted_item >= 0.05:
+            unassociated_psr_005_01 += 1
+        else:
+            unassociated_psr_00_005 += 1
+print("total ", len(test_dataset))
+
+# create data
+df1 = pd.DataFrame([
+    ['AGN', unassociated_agn_095_10, unassociated_agn_09_095, unassociated_agn_08_09, unassociated_agn_07_08,
+     unassociated_agn_06_07, unassociated_agn_05_06]],
+    columns=['Classification-LR-'+str(tot_iter), '0.95-1.0', '0.90-0.95', '0.8-0.9', '0.7-0.8', '0.6-0.7', '0.5-0.6'])
+
+df2 = pd.DataFrame([
+    ['PSR', unassociated_psr_00_005, unassociated_psr_005_01, unassociated_psr_01_02, unassociated_psr_02_03,
+     unassociated_psr_03_04, unassociated_psr_04_05]],
+    columns=['Classification-LR-'+str(tot_iter), '0.0-0.05', '0.05-0.1', '0.1-0.2', '0.2-0.3', '0.3-0.4', '0.4-0.5'])
+
+# plot grouped bar chart
+ax1 = df1.plot(x='Classification-LR-'+str(tot_iter),
+        kind='bar',
+        stacked=False,
+        title=str(unassociated_agn)+' unassociated sources AGN classification')
+for container in ax1.containers:
+    ax1.bar_label(container)
+
+ax2 = df2.plot(x='Classification-LR-'+str(tot_iter),
+        kind='bar',
+        stacked=False,
+        title=str(unassociated_psr)+' unassociated sources PSR classification')
+for container in ax2.containers:
+    ax2.bar_label(container)
+
+plt.show()
