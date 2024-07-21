@@ -1,6 +1,8 @@
+import sys
 import math
 import torch
 import random
+import pandas as pd
 import torch.nn as nn
 from math import log, sqrt
 
@@ -162,3 +164,20 @@ def dataset_to_features(dataset):
     train_features = ([(i.detach().numpy()) for i in dataset])
     # print("train_features = ", train_features)
     return train_features
+
+def read_join_datset(source_xy_df):
+    filtered_subset_df = pd.read_csv('../../CSV/filtered_subset_df.csv')
+    print("len(filtered_subset_df) = ", len(filtered_subset_df))
+    joined_df = pd.merge(filtered_subset_df, source_xy_df, left_on='4FGLDR1', right_on='source_name', how='inner')
+    print("len(joined_df) = ", len(joined_df))
+    return joined_df
+
+def get_xy_values(joined_df):
+    xy_values = joined_df['xy_values'].tolist()
+    # print("xy_values = ", xy_values)
+    print("len = ", len(xy_values))
+    x = list(zip(*xy_values))[0]
+    y = list(zip(*xy_values))[1]
+    print("len(x) =", len(x))
+    print("len(y) =", len(y))
+    return x,y

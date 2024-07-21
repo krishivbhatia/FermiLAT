@@ -226,18 +226,6 @@ joined_BSL_1FGL_2FGL_3FGL.to_csv('../../CSV/joined_BSL_1FGL_2FGL_3FGL.csv')
 joined_BSL_1FGL_2FGL_3FGL_NONE_CLS1_BSL = joined_BSL_1FGL_2FGL_3FGL[joined_BSL_1FGL_2FGL_3FGL["CLASS1-BSL"]=='']
 joined_BSL_1FGL_2FGL_3FGL_NONE_CLS1_BSL.to_csv('../../CSV/joined_BSL_1FGL_2FGL_3FGL_NONE_CLS1_BSL.csv')
 
-print("=========================Merge 3FGL, 4FGL-DR1=========================")
-joined_3FGL_4FGLDR1 = pd.merge(fgl3_join_4fgl_df, fgl4dr1_df, left_on='3FGL', right_on='4FGLDR1-3FGL', how='left')
-# joined_3FGL_4FGLDR1.to_csv('../../CSV/joined_3FGL_4FGLDR1.csv')
-
-print("=========================Merge 3FGL, 4FGL-DR1, 4FGL-DR2=========================")
-joined_3FGL_4FGLDR1_DR2 = pd.merge(joined_3FGL_4FGLDR1, fgl4dr2_df, left_on='3FGL', right_on='4FGLDR2-3FGL', how='left')
-# joined_3FGL_4FGLDR1_DR2.to_csv('../../CSV/joined_3FGL_4FGLDR1_DR2.csv')
-
-print("=========================Merge 3FGL, 4FGL-DR1, 4FGL-DR2, 4FGL-DR3=========================")
-joined_3FGL_4FGLDR1_DR2_DR3 = pd.merge(joined_3FGL_4FGLDR1_DR2, fgl4dr3_df, left_on='3FGL', right_on='4FGLDR3-3FGL', how='left')
-# joined_3FGL_4FGLDR1_DR2_DR3.to_csv('../../CSV/joined_3FGL_4FGLDR1_DR2_DR3.csv')
-
 def flag_df(df):
     if df['CLASS1-3FGL'] == "" or df['CLASS1-3FGL'] is None:
         return 0
@@ -251,16 +239,32 @@ def flag_df(df):
             and (df['CLASS1-3FGL'] == df['CLASS1-4FGLDR3']) \
             and (df['CLASS1-3FGL'] == df['CLASS1-4FGLDR4'])):
         return 2
-    elif ((df['CLASS1-3FGL'] != "") \
-          and (df['CLASS1-4FGLDR1'] != "") \
-          and (df['CLASS1-4FGLDR2'] != "") \
-          and (df['CLASS1-4FGLDR3'] != "") \
-          and (df['CLASS1-4FGLDR4'] != "")):
+    elif (df['CLASS1-3FGL'] != "" and df['CLASS1-3FGL'] is not None and df['CLASS1-3FGL'] \
+          and df['CLASS1-4FGLDR1'] != "" and df['CLASS1-4FGLDR1'] is not None and df['CLASS1-4FGLDR1'] \
+          and df['CLASS1-4FGLDR2'] != "" and df['CLASS1-4FGLDR2'] is not None and df['CLASS1-4FGLDR2'] \
+          and df['CLASS1-4FGLDR3'] != "" and df['CLASS1-4FGLDR3'] is not None and df['CLASS1-4FGLDR3'] \
+          and df['CLASS1-4FGLDR4'] != "" and df['CLASS1-4FGLDR4'] is not None and df['CLASS1-4FGLDR4']):
         return 3
     else:
         return 4
 
+print("=========================Merge 3FGL, 4FGL-DR1=========================")
+joined_3FGL_4FGLDR1 = pd.merge(fgl3_join_4fgl_df, fgl4dr1_df, left_on='3FGL', right_on='4FGLDR1-3FGL', how='left')
+# joined_3FGL_4FGLDR1.to_csv('../../CSV/joined_3FGL_4FGLDR1.csv')
+
+print("=========================Merge 3FGL, 4FGL-DR1, 4FGL-DR2=========================")
+joined_3FGL_4FGLDR1_DR2 = pd.merge(joined_3FGL_4FGLDR1, fgl4dr2_df, left_on='3FGL', right_on='4FGLDR2-3FGL', how='left')
+# joined_3FGL_4FGLDR1_DR2.to_csv('../../CSV/joined_3FGL_4FGLDR1_DR2.csv')
+
+print("=========================Merge 3FGL, 4FGL-DR1, 4FGL-DR2, 4FGL-DR3=========================")
+joined_3FGL_4FGLDR1_DR2_DR3 = pd.merge(joined_3FGL_4FGLDR1_DR2, fgl4dr3_df, left_on='3FGL', right_on='4FGLDR3-3FGL', how='left')
+# joined_3FGL_4FGLDR1_DR2_DR3.to_csv('../../CSV/joined_3FGL_4FGLDR1_DR2_DR3.csv')
+
 print("=========================Merge 3FGL, 4FGL-DR1, 4FGL-DR2, 4FGL-DR3, 4FGL-DR4=========================")
-joined_3FGL_4FGLDR1_DR2_DR3_DR4 = pd.merge(joined_3FGL_4FGLDR1_DR2_DR3, fgl4dr4_df, left_on='3FGL', right_on='4FGLDR4-3FGL', how='left')
+joined_3FGL_4FGLDR1_DR2_DR3_DR4 = pd.merge(joined_3FGL_4FGLDR1_DR2_DR3, fgl4dr4_df, left_on='3FGL', right_on='4FGLDR4-3FGL', how='left').fillna("")
 joined_3FGL_4FGLDR1_DR2_DR3_DR4['status'] = joined_3FGL_4FGLDR1_DR2_DR3_DR4.apply(flag_df, axis = 1)
 joined_3FGL_4FGLDR1_DR2_DR3_DR4.to_csv('../../CSV/joined_3FGL_4FGLDR1_DR2_DR3_DR4.csv')
+filtered_3FGL_4FGLDR1_DR2_DR3_DR4 = joined_3FGL_4FGLDR1_DR2_DR3_DR4[
+    (joined_3FGL_4FGLDR1_DR2_DR3_DR4['status']==2) | (joined_3FGL_4FGLDR1_DR2_DR3_DR4['status']==3)]
+filtered_subset_df = filtered_3FGL_4FGLDR1_DR2_DR3_DR4[['3FGL', '4FGLDR1', '4FGLDR2', '4FGLDR3', '4FGLDR4', 'status']]
+filtered_subset_df.to_csv('../../CSV/filtered_subset_df.csv')
