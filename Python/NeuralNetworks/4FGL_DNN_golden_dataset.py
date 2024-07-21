@@ -20,7 +20,7 @@ from torch.utils.data import DataLoader
 from sklearn.preprocessing import StandardScaler
 
 from Utils.utils import run_iteration
-from LogisticRegression import LogisticRegression
+from DeepNeuralNetwork import DeepNeuralNetworkModel
 from Utils.FGL4_GoldenDataset import FGL4_GoldenDataset
 from Utils.FGL4Dataset_cls1_null import FGL4Dataset_Cls1_Null
 
@@ -110,9 +110,9 @@ best_p_values = []
 
 torch.set_default_tensor_type(torch.DoubleTensor)
 torch.manual_seed(82)
-LogRegModel = LogisticRegression(train_dataset)
+DNNModel = DeepNeuralNetworkModel(train_dataset)
 # Stochastic Gradient Descent. I could use Adams but Adams is worse than regular SGD unless you
-optimizer = torch.optim.SGD(LogRegModel.parameters(), lr=0.0001)
+optimizer = torch.optim.SGD(DNNModel.parameters(), lr=0.0001)
 print("optimizer = ", optimizer.__class__)
 # Binary Cross Entropy Loss which is the loss method that would most likely be used in this scenario
 criterion = nn.BCELoss()
@@ -124,11 +124,11 @@ for iteration in range(0, tot_iter):
     total_samples = len(train_dataset)
     # KrishivB: Put run_iteration code in utils.py, imported it, and call here
     for epoch in range(30):
-        (dev_inputs, dev_labels) = run_iteration(LogRegModel, iteration, train_dataset, total_samples, criterion,
+        (dev_inputs, dev_labels) = run_iteration(DNNModel, iteration, train_dataset, total_samples, criterion,
                                                  optimizer, dev_inputs, dev_labels, True)
 # correct = correct_agn = correct_psr = total_agn = total_psr = 0
 # for i, (inputs, labels) in enumerate(test_dataset):
-#     y_predicted = LogRegModel(inputs)  # Insert/fit Model for prediction here
+#     y_predicted = NNModel(inputs)  # Insert/fit Model for prediction here
 #     predicted_item = y_predicted.data.item()
 #     print("  i, y_predicted, y_predicted.data, predicted_item = ", i, y_predicted, y_predicted.data, predicted_item)
 #     predicted_val = 0 if (math.isnan(predicted_item)) else round(predicted_item)
@@ -173,7 +173,7 @@ print("cls1_none_dataloader.dataset size=", len(cls1_none_dataloader.dataset))
 train_dataset, test_dataset = torch.utils.data.random_split(cls1_none_dataloader.dataset, [0, len(cls1_none_dataloader.dataset)])
 print("test_dataset size=", len(test_dataset))
 for i, inputs in enumerate(test_dataset):
-    y_predicted = LogRegModel(inputs)  # Insert/fit Model for prediction here
+    y_predicted = DNNModel(inputs)  # Insert/fit Model for prediction here
     predicted_item = y_predicted.data.item()
     print("i, y_predicted, y_predicted.data, predicted_item = ", i, y_predicted, y_predicted.data, predicted_item)
     predicted_val = 0 if (math.isnan(predicted_item)) else round(predicted_item)
@@ -212,22 +212,22 @@ print("total ", len(test_dataset))
 df1 = pd.DataFrame([
     ['AGN', unassociated_agn_095_10, unassociated_agn_09_095, unassociated_agn_08_09, unassociated_agn_07_08,
      unassociated_agn_06_07, unassociated_agn_05_06]],
-    columns=['Classification-LR-'+str(tot_iter), '0.95-1.0', '0.90-0.95', '0.8-0.9', '0.7-0.8', '0.6-0.7', '0.5-0.6'])
+    columns=['Classification-DNN-'+str(tot_iter), '0.95-1.0', '0.90-0.95', '0.8-0.9', '0.7-0.8', '0.6-0.7', '0.5-0.6'])
 
 df2 = pd.DataFrame([
     ['PSR', unassociated_psr_00_005, unassociated_psr_005_01, unassociated_psr_01_02, unassociated_psr_02_03,
      unassociated_psr_03_04, unassociated_psr_04_05]],
-    columns=['Classification-LR-'+str(tot_iter), '0.0-0.05', '0.05-0.1', '0.1-0.2', '0.2-0.3', '0.3-0.4', '0.4-0.5'])
+    columns=['Classification-DNN-'+str(tot_iter), '0.0-0.05', '0.05-0.1', '0.1-0.2', '0.2-0.3', '0.3-0.4', '0.4-0.5'])
 
 # plot grouped bar chart
-ax1 = df1.plot(x='Classification-LR-'+str(tot_iter),
+ax1 = df1.plot(x='Classification-DNN-'+str(tot_iter),
         kind='bar',
         stacked=False,
         title=str(unassociated_agn)+' unassociated sources AGN classification')
 for container in ax1.containers:
     ax1.bar_label(container)
 
-ax2 = df2.plot(x='Classification-LR-'+str(tot_iter),
+ax2 = df2.plot(x='Classification-DNN-'+str(tot_iter),
         kind='bar',
         stacked=False,
         title=str(unassociated_psr)+' unassociated sources PSR classification')

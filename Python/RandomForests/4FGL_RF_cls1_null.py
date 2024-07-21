@@ -17,7 +17,6 @@ from collections import OrderedDict
 from torch.utils.data import DataLoader
 from sklearn.preprocessing import StandardScaler
 
-from Utils.FGL4Dataset import FGL4Dataset
 from Utils.FGL4DatasetMultiply import FGL4DatasetMultiply
 from random_forest import TorchRandomForestClassifier
 from Utils.utils import dataset_to_features, dataset_to_features_labels
