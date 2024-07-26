@@ -7,7 +7,8 @@ from Utils.utils import read_join_datset, get_xy_values
 
 
 class FGL4_GoldenDataset(Dataset):
-    def __init__(self, wanted_type_col, flux_col, wanted_types, wanted_feature_names, point_source_catalogue):
+    def __init__(self, wanted_type_col, flux_col, wanted_types, wanted_feature_names,
+                 point_source_catalogue):
         # Create x/input data
         xdata = []
         ydata = []

@@ -28,9 +28,6 @@ from Utils.FGL4Dataset_cls1_null import FGL4Dataset_Cls1_Null
 # https://www.youtube.com/watch?v=qx6y1OX4S6A Astropy for opening fits files
 # Use OS to find path https://www.pythoncheatsheet.org/cheatsheet/file-directory-path
 
-# KrishivB: The wanted_type_col has the wantedtypes. This is different between 3FGL and 4FGL file.
-#           Define it here and pass it to the FGL4Dataset class constructor
-wanted_type_col = 74 # 69
 # KrishivB: Modified path to 4FGL file
 # path = os.path.join(os.getcwd(), "../../FITS/gll_psc_v33.fit")
 path = os.path.join(os.getcwd(), "../../FITS/gll_psc_v22_4FGL_DR1.fit")
@@ -65,6 +62,9 @@ print()
 # pointsourcecatalogue.data[a][b] corresponds with the a+1th row and b+1th column in the catalogue
 # It is recommended you open the fit file to help easily find corresponding values
 
+# KrishivB: The wanted_type_col has the wantedtypes. This is different between 3FGL and 4FGL file.
+#           Define it here and pass it to the FGL4Dataset class constructor
+wanted_type_col = 74 # 69
 # Creating Training and Test Datasets
 # The paper selects these classes of objects to be apart of the dataset
 # KrishivB: Added AGN in caps
@@ -79,14 +79,14 @@ wantedfeatureindices = [mapkey[x] for x in wantedfeaturenames]
 # The 3FGL paper wants hardness ratios of fluxes
 # KrishivB: found only 1 in 4FGL column names. Need to know if there are more
 flux_col = "Flux_Band"
-
 sc = StandardScaler()
 # Now we can make our dataset and dataloader
 # More on basics of dataloaders here:
 #   https://www.youtube.com/watch?v=PXOzkkB5eH0&list=PLqnslRFeH2UrcDBWF5mfPGpqQDSta6VK4&index=9
 # KrishivB: separated class FGL4Dataset(Dataset) into file FGL4Dataset.py and imported it
 #           Just call its constructor here
-dataset = FGL4_GoldenDataset(wanted_type_col, flux_col, wantedtypes, wantedfeaturenames, pointsourcecatalogue)
+dataset = FGL4_GoldenDataset(wanted_type_col, flux_col, wantedtypes,
+                             wantedfeaturenames, pointsourcecatalogue)
 print("len(dataset) = ", len(dataset))
 torch.manual_seed(42)  # Set shuffle seed to a certain value for reproducibility
 dataloader = DataLoader(dataset=dataset, shuffle=True)
@@ -116,7 +116,7 @@ optimizer = torch.optim.SGD(LogRegModel.parameters(), lr=0.0001)
 print("optimizer = ", optimizer.__class__)
 # Binary Cross Entropy Loss which is the loss method that would most likely be used in this scenario
 criterion = nn.BCELoss()
-tot_iter = 200
+tot_iter = 1000
 print("total iterations = ", tot_iter)
 for iteration in range(0, tot_iter):
     dev_inputs = dev_labels = []

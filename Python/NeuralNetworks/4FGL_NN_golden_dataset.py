@@ -116,7 +116,7 @@ optimizer = torch.optim.SGD(NNModel.parameters(), lr=0.0001)
 print("optimizer = ", optimizer.__class__)
 # Binary Cross Entropy Loss which is the loss method that would most likely be used in this scenario
 criterion = nn.BCELoss()
-tot_iter = 200
+tot_iter = 1000
 print("total iterations = ", tot_iter)
 for iteration in range(0, tot_iter):
     dev_inputs = dev_labels = []
