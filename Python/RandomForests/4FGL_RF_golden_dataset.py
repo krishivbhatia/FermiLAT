@@ -24,9 +24,12 @@ from Utils.utils import dataset_to_features, dataset_to_features_labels
 
 # https://www.youtube.com/watch?v=qx6y1OX4S6A Astropy for opening fits files
 # Use OS to find path https://www.pythoncheatsheet.org/cheatsheet/file-directory-path
-wanted_type_col = 74 # 69
+wanted_type_col = 69 # 64 # 74
 # path = os.path.join(os.getcwd(), "../../FITS/gll_psc_v33.fit")
-path = os.path.join(os.getcwd(), "../../FITS/gll_psc_v22_4FGL_DR1.fit")
+# path = os.path.join(os.getcwd(), "../../FITS/gll_psc_v22_4FGL_DR1.fit")
+# path = os.path.join(os.getcwd(), "../../FITS/gll_psc_v27_4FGL_DR2.fit")
+# path = os.path.join(os.getcwd(), "../../FITS/gll_psc_v31_4FGL_DR3.fit")
+path = os.path.join(os.getcwd(), "../../FITS/gll_psc_v33_4FGL_DR4.fit")
 mainfile = fits.open(path)
 pointsourcecatalogue = mainfile[1]
 # print("pointsourcecatalogue.header = ", pointsourcecatalogue.header)
@@ -58,7 +61,7 @@ print()
 wantedtypes = ["PSR", "psr", "YNG", "yng", "MSP", "msp", "FSRQ", "fsrq", "BLL", "bll", "BCU", "bcu", "RDG", "rdg",
                "NLSY1", "nlsy1", "AGN", "agn", "ssrq", "sey"]
 # The paper selects these columns/features to be the inputs that will be taken into account
-wantedfeaturenames = ["PL_Index", "LP_Index", "PLEC_Index", "Variability_Index", "Unc_PL_Flux_Density",
+wantedfeaturenames = ["PL_Index", "LP_Index", "PLEC_IndexS", "Variability_Index", "Unc_PL_Flux_Density",
                       "Unc_LP_Flux_Density", "Unc_Energy_Flux100", "Unc_PLEC_Flux_Density",  "Unc_Flux1000",
                       "LP_beta", "Frac_Variability", "LP_SigCurv", "Signif_Avg"]
 wantedfeatureindices = [mapkey[x] for x in wantedfeaturenames]
@@ -96,7 +99,7 @@ dev_labels = []
 torch.set_default_tensor_type(torch.DoubleTensor)
 torch.manual_seed(42)
 # Krishiv Bhatia: Invoke TorchRandomForestClassifier
-random_forest = TorchRandomForestClassifier(2000, 500, 10)
+random_forest = TorchRandomForestClassifier(100, 500, 10)
 print("random forest = ", random_forest.nb_trees, random_forest.nb_samples, random_forest.max_depth)
 
 # Krishiv Bhatia: split train dataset into features and labels

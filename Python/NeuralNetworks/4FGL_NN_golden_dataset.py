@@ -30,10 +30,13 @@ from Utils.FGL4Dataset_cls1_null import FGL4Dataset_Cls1_Null
 
 # KrishivB: The wanted_type_col has the wantedtypes. This is different between 3FGL and 4FGL file.
 #           Define it here and pass it to the FGL4Dataset class constructor
-wanted_type_col = 74 # 69
+wanted_type_col = 69 # 64 # 74
 # KrishivB: Modified path to 4FGL file
 # path = os.path.join(os.getcwd(), "../../FITS/gll_psc_v33.fit")
-path = os.path.join(os.getcwd(), "../../FITS/gll_psc_v22_4FGL_DR1.fit")
+# path = os.path.join(os.getcwd(), "../../FITS/gll_psc_v22_4FGL_DR1.fit")
+# path = os.path.join(os.getcwd(), "../../FITS/gll_psc_v27_4FGL_DR2.fit")
+# path = os.path.join(os.getcwd(), "../../FITS/gll_psc_v31_4FGL_DR3.fit")
+path = os.path.join(os.getcwd(), "../../FITS/gll_psc_v33_4FGL_DR4.fit")
 mainfile = fits.open(path)
 pointsourcecatalogue = mainfile[1]
 # print("pointsourcecatalogue.header = ", pointsourcecatalogue.header)
@@ -72,7 +75,7 @@ wantedtypes = ["PSR", "psr", "YNG", "yng", "MSP", "msp", "FSRQ", "fsrq", "BLL", 
                "NLSY1", "nlsy1", "AGN", "agn", "ssrq", "sey"]
 # The 3FGL paper selects these columns/features to be the inputs that will be taken into account
 # KrishivB: Modified to 4FGL column names. Details in Abdollahi 2020 paper
-wantedfeaturenames = ["PL_Index", "LP_Index", "PLEC_Index", "Variability_Index", "Unc_PL_Flux_Density",
+wantedfeaturenames = ["PL_Index", "LP_Index", "PLEC_IndexS", "Variability_Index", "Unc_PL_Flux_Density",
                       "Unc_LP_Flux_Density", "Unc_Energy_Flux100", "Unc_PLEC_Flux_Density",
                       "Unc_Flux1000", "LP_beta", "Frac_Variability", "LP_SigCurv", "Signif_Avg"]
 wantedfeatureindices = [mapkey[x] for x in wantedfeaturenames]
@@ -116,7 +119,7 @@ optimizer = torch.optim.SGD(NNModel.parameters(), lr=0.0001)
 print("optimizer = ", optimizer.__class__)
 # Binary Cross Entropy Loss which is the loss method that would most likely be used in this scenario
 criterion = nn.BCELoss()
-tot_iter = 1000
+tot_iter = 2000
 print("total iterations = ", tot_iter)
 for iteration in range(0, tot_iter):
     dev_inputs = dev_labels = []
