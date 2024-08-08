@@ -1,10 +1,12 @@
-import sys
+import os
+import csv
 import math
 import torch
 import random
 import pandas as pd
-import torch.nn as nn
 from math import log, sqrt
+from astropy.io import fits
+from collections import OrderedDict
 
 
 def run_iteration(LogRegModel, iteration, train_dataset, total_samples, criterion,
@@ -181,3 +183,49 @@ def get_xy_values(joined_df):
     print("len(x) =", len(x))
     print("len(y) =", len(y))
     return x,y
+
+# Function to extract values from the second column that start with 'J'
+def extract_j_values():
+    j_values = []
+    with open('../../CSV/tbl6.txt', newline='', encoding='utf-8') as csvfile:
+        reader = csv.reader(csvfile, delimiter=' ')
+        for row in reader:
+            # Extract the second column value
+            second_column_value = row[1]
+            # Check if it starts with 'J'
+            if second_column_value.startswith('J'):
+                j_values.append(second_column_value)
+    return j_values
+
+def read_fits_file(path):
+    path = os.path.join(os.getcwd(), path)
+    mainfile = fits.open(path)
+    return mainfile[1]
+
+def get_keymap_mapkey(pointsourcecatalogue):
+    columns = 0
+    keymap = {}
+    mapkey = {}
+    for key in list(pointsourcecatalogue.header.keys()):
+        if "TTYPE" in key:
+            keymap[int(key[5:len(key)]) - 1] = pointsourcecatalogue.header[key]
+            mapkey[pointsourcecatalogue.header[key]] = int(key[5:len(key)]) - 1
+            # KrishivB: Print column number, name
+            # print(columns, pointsourcecatalogue.header[key])
+            columns += 1
+    # KrishivB: Print # columns. Subtract 1 for column header
+    print("# columns = ", columns - 1)
+    # This keymap contains all the names of the corresponding column, keymap[n] contains the name of the n+1th column
+    # KrishivB: keymap maps column # to name
+    #           keymap =  OrderedDict([(0, 'Source_Name'), (1, 'RAJ2000'), (2, 'DEJ2000') ...
+    keymap = OrderedDict(sorted(keymap.items()))
+    print("keymap = ", keymap)
+    # KrishivB: mapkey maps column name to #
+    #           mapkey =  OrderedDict([('0FGL_Name', 64), ('1FGL_Name', 65), ('1FHL_Name', 67) ...
+    mapkey = OrderedDict(sorted(mapkey.items()))
+    print("mapkey = ", mapkey)
+    return keymap, mapkey
+
+def read_csv_file(csv_path):
+    df = pd.read_csv(csv_path)
+    return df
