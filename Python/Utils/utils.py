@@ -4,9 +4,14 @@ import math
 import torch
 import random
 import pandas as pd
+import torch.nn as nn
 from math import log, sqrt
 from astropy.io import fits
 from collections import OrderedDict
+from torch.utils.data import DataLoader
+from LogisticRegression import LogisticRegression
+from NeuralNetworks.NeuralNetwork_Tbl6 import NeuralNetworkModel_Tbl6
+from NeuralNetworks.DeepNeuralNetwork_Tbl6 import DeepNeuralNetworkModel_Tbl6
 
 
 def run_iteration(LogRegModel, iteration, train_dataset, total_samples, criterion,
@@ -143,10 +148,8 @@ def dataset_to_features_labels(dataset):
     #
     # Convert tensor feature array in dataset to numpy feature array
     train_features = ([((i[0]).detach().numpy()) for i in dataset])
-    # print("train_features = ", train_features)
     # Convert tensor label array in dataset to regular array
     train_labels = ([torch.LongTensor.item(i[1]) for i in dataset])
-    # print("train_labels = ", train_labels)
     return train_features, train_labels
 
 
@@ -226,6 +229,107 @@ def get_keymap_mapkey(pointsourcecatalogue):
     print("mapkey = ", mapkey)
     return keymap, mapkey
 
-def read_csv_file(csv_path):
-    df = pd.read_csv(csv_path)
+def read_csv_file(csv_path, col_names):
+    df = pd.read_csv(csv_path, names=col_names, header=None, sep=' ')
     return df
+
+def lr_train(dataset, iter_no):
+    torch.manual_seed(42)  # Set shuffle seed to a certain value for reproducibility
+    dataloader = DataLoader(dataset=dataset, shuffle=True)
+    # Splitting dataloader into train/dev/test sets
+    train_size = int(1.0 * len(dataloader.dataset))  # You did a 70%:30% train:test split
+    test_size = len(dataloader.dataset) - train_size
+    train_dataset, test_dataset = torch.utils.data.random_split(dataloader.dataset, [train_size, test_size])
+    print("train_size = ", train_size)
+    print("test_size = ", test_size)
+    print("len(dataloader) = ", len(dataloader))
+    print("len(dataloader.dataset)) = ", len(dataloader.dataset))
+    print("len(train_dataset) = ", len(train_dataset))
+    print("len(test_dataset) = ", len(test_dataset))
+    print("len(train_dataset.dataset) = ", len(train_dataset.dataset))
+    torch.set_default_tensor_type(torch.DoubleTensor)
+    torch.manual_seed(82)
+    LogRegModel = LogisticRegression(train_dataset)
+    # Stochastic Gradient Descent. I could use Adams but Adams is worse than regular SGD unless you
+    optimizer = torch.optim.SGD(LogRegModel.parameters(), lr=0.0001)
+    print("optimizer = ", optimizer.__class__)
+    # Binary Cross Entropy Loss which is the loss method that would most likely be used in this scenario
+    criterion = nn.BCELoss()
+    tot_iter = iter_no
+    print("total iterations = ", tot_iter)
+    for iteration in range(0, tot_iter):
+        dev_inputs = dev_labels = []
+        print("Iteration # ", iteration)
+        total_samples = len(train_dataset)
+        for epoch in range(30):
+            (dev_inputs, dev_labels) = run_iteration(LogRegModel, iteration, train_dataset, total_samples, criterion,
+                                                     optimizer, dev_inputs, dev_labels, True)
+    return LogRegModel
+
+def nn_train(dataset, iter_no):
+    torch.manual_seed(42)  # Set shuffle seed to a certain value for reproducibility
+    dataloader = DataLoader(dataset=dataset, shuffle=True)
+    # Splitting dataloader into train/dev/test sets
+    train_size = int(1.0 * len(dataloader.dataset))  # You did a 70%:30% train:test split
+    test_size = len(dataloader.dataset) - train_size
+    train_dataset, test_dataset = torch.utils.data.random_split(dataloader.dataset, [train_size, test_size])
+    print("train_size = ", train_size)
+    print("test_size = ", test_size)
+    print("len(dataloader) = ", len(dataloader))
+    print("len(dataloader.dataset)) = ", len(dataloader.dataset))
+    print("len(train_dataset) = ", len(train_dataset))
+    print("len(test_dataset) = ", len(test_dataset))
+    print("len(train_dataset.dataset) = ", len(train_dataset.dataset))
+    torch.set_default_tensor_type(torch.DoubleTensor)
+    torch.manual_seed(82)
+    NNModel = NeuralNetworkModel_Tbl6(train_dataset)
+    # Stochastic Gradient Descent. I could use Adams but Adams is worse than regular SGD unless you
+    optimizer = torch.optim.SGD(NNModel.parameters(), lr=0.0001)
+    print("optimizer = ", optimizer.__class__)
+    # Binary Cross Entropy Loss which is the loss method that would most likely be used in this scenario
+    criterion = nn.BCELoss()
+    for iteration in range(0, iter_no):
+        dev_inputs = dev_labels = []
+        print("Iteration # ", iteration)
+        total_samples = len(train_dataset)
+        for epoch in range(30):
+            (dev_inputs, dev_labels) = run_iteration(NNModel, iteration, train_dataset, total_samples, criterion,
+                                                     optimizer, dev_inputs, dev_labels, True)
+    return NNModel
+
+def dnn_train(dataset, iter_no):
+    torch.manual_seed(42)  # Set shuffle seed to a certain value for reproducibility
+    dataloader = DataLoader(dataset=dataset, shuffle=True)
+    # Splitting dataloader into train/dev/test sets
+    train_size = int(1.0 * len(dataloader.dataset))  # You did a 70%:30% train:test split
+    test_size = len(dataloader.dataset) - train_size
+    train_dataset, test_dataset = torch.utils.data.random_split(dataloader.dataset, [train_size, test_size])
+    print("train_size = ", train_size)
+    print("test_size = ", test_size)
+    print("len(dataloader) = ", len(dataloader))
+    print("len(dataloader.dataset)) = ", len(dataloader.dataset))
+    print("len(train_dataset) = ", len(train_dataset))
+    print("len(test_dataset) = ", len(test_dataset))
+    print("len(train_dataset.dataset) = ", len(train_dataset.dataset))
+    torch.set_default_tensor_type(torch.DoubleTensor)
+    torch.manual_seed(82)
+    DNNModel = DeepNeuralNetworkModel_Tbl6(train_dataset)
+    # Stochastic Gradient Descent. I could use Adams but Adams is worse than regular SGD unless you
+    optimizer = torch.optim.SGD(DNNModel.parameters(), lr=0.0001)
+    print("optimizer = ", optimizer.__class__)
+    # Binary Cross Entropy Loss which is the loss method that would most likely be used in this scenario
+    criterion = nn.BCELoss()
+    for iteration in range(0, iter_no):
+        dev_inputs = dev_labels = []
+        print("Iteration # ", iteration)
+        total_samples = len(train_dataset)
+        for epoch in range(30):
+            (dev_inputs, dev_labels) = run_iteration(DNNModel, iteration, train_dataset, total_samples, criterion,
+                                                     optimizer, dev_inputs, dev_labels, True)
+    return DNNModel
+
+def predict(predicted_val):
+    predicted_item = predicted_val.data.item()
+    ret_val = 'PSR' if math.isnan(predicted_item) or (round(predicted_item) == 0) else 'AGN'
+    print(predicted_item, round(predicted_item), ret_val)
+    return ret_val

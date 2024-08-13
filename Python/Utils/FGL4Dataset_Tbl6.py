@@ -4,7 +4,7 @@ import numpy as np
 from torch.utils.data import Dataset
 
 
-class FGL4Dataset(Dataset):
+class FGL4Dataset_Tbl6(Dataset):
     def __init__(self, wanted_type_col, flux_col, wanted_types,
                  wanted_feature_names, point_source_catalogue):
         # Create x/input data
@@ -26,24 +26,29 @@ class FGL4Dataset(Dataset):
                 unit.append(float(source[wanted_feature_names[3]]))
                 unit.append(math.log(source[wanted_feature_names[4]])
                             if (source[wanted_feature_names[4]] > 0) else float(source[wanted_feature_names[4]]))
-                unit.append(math.log(source[wanted_feature_names[5]])
-                            if (source[wanted_feature_names[5]] > 0) else float(source[wanted_feature_names[5]]))
-                unit.append(math.log(source[wanted_feature_names[6]])
-                            if (source[wanted_feature_names[6]] > 0) else float(source[wanted_feature_names[6]]))
-                unit.append(math.log(source[wanted_feature_names[7]])
-                            if (source[wanted_feature_names[7]] > 0) else float(source[wanted_feature_names[7]]))
-                unit.append(math.log(source[wanted_feature_names[8]])
-                            if (source[wanted_feature_names[8]] > 0) else float(source[wanted_feature_names[8]]))
+                # unit.append(math.log(source[wanted_feature_names[5]])
+                #             if (source[wanted_feature_names[5]] > 0) else float(source[wanted_feature_names[5]]))
+                # unit.append(math.log(source[wanted_feature_names[6]])
+                #             if (source[wanted_feature_names[6]] > 0) else float(source[wanted_feature_names[6]]))
+                # unit.append(math.log(source[wanted_feature_names[7]])
+                #             if (source[wanted_feature_names[7]] > 0) else float(source[wanted_feature_names[7]]))
+                # unit.append(math.log(source[wanted_feature_names[8]])
+                #             if (source[wanted_feature_names[8]] > 0) else float(source[wanted_feature_names[8]]))
                 # unit.append(math.log(source[wanted_feature_names[9]])
                 #             if (source[wanted_feature_names[9]] > 0) else float(source[wanted_feature_names[9]]))
-                unit.append(float(source[wanted_feature_names[9]]))
-                unit.append(float(source[wanted_feature_names[10]]))
-                unit.append(float(source[wanted_feature_names[11]]))
-                unit.append(float(source[wanted_feature_names[12]]))
+                # unit.append(float(source[wanted_feature_names[9]]))
+                # unit.append(float(source[wanted_feature_names[10]]))
+                # unit.append(float(source[wanted_feature_names[11]]))
+                # unit.append(float(source[wanted_feature_names[12]]))
                 # Calculate hardness ratios (also considered in the paper)
-                for index in range(1, len(flux_list)):
-                    unit.append((flux_list[index] - flux_list[index-1] + 0.0) /
-                                (flux_list[index] + flux_list[index-1] + 0.0))
+                sum_flux = 0
+                count = 0
+                for ind_outer in range(0, len(flux_list)-1):
+                    for ind_inner in range(ind_outer+1, len(flux_list)):
+                        count += 1
+                        sum_flux += (flux_list[ind_outer] - flux_list[ind_inner] + 0.0) / (
+                                     (flux_list[ind_outer] + flux_list[ind_inner] + 0.0))
+                unit.append(sum_flux/count)
                 xdata.append(unit)
                 if source[wanted_type_col] in ("PSR", "psr", "MSP", "msp"):
                     ydata.append([0])  # 0 is for pulsar

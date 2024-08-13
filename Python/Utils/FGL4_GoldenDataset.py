@@ -7,8 +7,8 @@ from Utils.utils import read_join_datset, get_xy_values
 
 
 class FGL4_GoldenDataset(Dataset):
-    def __init__(self, wanted_type_col, flux_col, wanted_types, wanted_feature_names,
-                 point_source_catalogue):
+    def __init__(self, wanted_type_col, flux_col, wanted_types,
+                 wanted_feature_names, point_source_catalogue):
         # Create x/input data
         xdata = []
         ydata = []
@@ -58,10 +58,10 @@ class FGL4_GoldenDataset(Dataset):
                 xdata_dict[source_name] = (unit, ydata_val)
                 # xdata.append(unit)
         # print("xdata = ", xdata_dict)
-        source_xy_df = pd.DataFrame(list(xdata_dict.items()), columns=['source_name','xy_values'])
-        joined_df = read_join_datset(source_xy_df)
-        print("len(joined_df) = ", len(joined_df))
-        xdata, ydata = get_xy_values(joined_df)
+        source_xy_df = pd.DataFrame(list(xdata_dict.items()), columns=['src_name','xy_values'])
+        self.joined_df = read_join_datset(source_xy_df)
+        print("len(joined_df) = ", len(self.joined_df))
+        xdata, ydata = get_xy_values(self.joined_df)
         self.x = torch.from_numpy(np.array(xdata, float))
         self.y = torch.from_numpy(np.array(ydata, float))
         self.size = len(xdata)
@@ -71,3 +71,6 @@ class FGL4_GoldenDataset(Dataset):
 
     def __len__(self):
         return self.size
+
+    def get_df(self):
+        return self.joined_df

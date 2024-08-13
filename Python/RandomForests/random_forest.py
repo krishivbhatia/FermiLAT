@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import torch
 
+from torch.utils.data import DataLoader
+from Utils.utils import dataset_to_features_labels
 from Utils.utils import sample_vectors, sample_dimensions
 from DecisionTrees.decision_tree import TorchDecisionTreeClassifier, TorchDecisionTreeRegressor
 
@@ -81,6 +83,10 @@ class TorchRandomForestClassifier(torch.nn.Module):
         return sum(predictions)/len(self.trees)
         # return max(set(predictions), key=predictions.count)
 
+    def predict_tbl6(self, vector):
+        predicted_value = self.predict(vector)
+        return 'AGN' if predicted_value >= 0.5 else 'PSR'
+
 
 class TorchRandomForestRegressor(torch.nn.Module):
     """
@@ -153,3 +159,29 @@ class TorchRandomForestRegressor(torch.nn.Module):
             predictions_sum += tree.predict(sampled_vector)
 
         return predictions_sum/len(self.trees)
+
+
+def rf_fit(dataset, trees, samples, depth):
+    torch.manual_seed(42)  # Set shuffle seed to a certain value for reproducibility
+    dataloader = DataLoader(dataset=dataset, shuffle=True)
+    # Splitting dataloader into train/dev/test sets
+    train_size = int(1.0 * len(dataloader.dataset))  # You did a 70%:30% train:test split
+    test_size = len(dataloader.dataset) - train_size
+    train_dataset, test_dataset = torch.utils.data.random_split(dataloader.dataset, [train_size, test_size])
+    print("train_size = ", train_size)
+    print("test_size = ", test_size)
+    print("len(dataloader) = ", len(dataloader))
+    print("len(dataloader.dataset)) = ", len(dataloader.dataset))
+    print("len(train_dataset) = ", len(train_dataset))
+    print("len(test_dataset) = ", len(test_dataset))
+    print("len(train_dataset.dataset) = ", len(train_dataset.dataset))
+    total_samples = len(train_dataset)
+    torch.set_default_tensor_type(torch.DoubleTensor)
+    torch.manual_seed(42)
+    # Krishiv Bhatia: Invoke TorchRandomForestClassifier
+    random_forest = TorchRandomForestClassifier(trees, samples, depth)
+    print("random forest = ", random_forest.nb_trees, random_forest.nb_samples, random_forest.max_depth)
+    # Krishiv Bhatia: split train dataset into features and labels
+    train_features, train_labels = dataset_to_features_labels(train_dataset)
+    random_forest.fit(torch.FloatTensor(train_features), torch.LongTensor(train_labels))
+    return random_forest

@@ -116,7 +116,7 @@ for i in range(test_size):
     predicted_result = random_forest.predict(torch.FloatTensor(test_features[i]))
     print("test_labels[i] = ", test_labels[i])
     actual_result = test_labels[i]
-    print("i, predicted_result, actual_result = ", i, predicted_result, actual_result)
+    print("i, predicted_result, actual_result = ", i, predi/cted_result, actual_result)
     if int(predicted_result) == int(actual_result):
         correct += 1
 print("correct = ", correct)

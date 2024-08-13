@@ -44,7 +44,7 @@ for key in list(pointsourcecatalogue.header.keys()):
         keymap[int(key[5:len(key)])-1] = pointsourcecatalogue.header[key]
         mapkey[pointsourcecatalogue.header[key]] = int(key[5:len(key)])-1
         # KrishivB: Print column number, name
-        # print(columns, pointsourcecatalogue.header[key])
+        print(columns, pointsourcecatalogue.header[key])
         columns += 1
 # KrishivB: Print # columns. Subtract 1 for column header
 print("# columns = ", columns-1)
