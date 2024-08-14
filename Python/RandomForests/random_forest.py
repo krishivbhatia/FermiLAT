@@ -25,7 +25,7 @@ class TorchRandomForestClassifier(torch.nn.Module):
             fitting and the prediction.
 
     """
-    def __init__(self,  nb_trees, nb_samples, max_depth=-1, bootstrap=True):
+    def __init__(self, nb_trees, nb_samples, max_depth=-1, bootstrap=True):
         self.trees = []
         self.trees_features = []
         self.nb_trees = nb_trees
