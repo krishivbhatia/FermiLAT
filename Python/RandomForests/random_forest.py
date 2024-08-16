@@ -177,7 +177,6 @@ def rf_fit(dataset, trees, samples, depth):
     print("len(train_dataset.dataset) = ", len(train_dataset.dataset))
     total_samples = len(train_dataset)
     torch.set_default_tensor_type(torch.DoubleTensor)
-    torch.manual_seed(42)
     # Krishiv Bhatia: Invoke TorchRandomForestClassifier
     random_forest = TorchRandomForestClassifier(trees, samples, depth)
     print("random forest = ", random_forest.nb_trees, random_forest.nb_samples, random_forest.max_depth)
