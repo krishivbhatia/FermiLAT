@@ -229,15 +229,15 @@ def get_keymap_mapkey(pointsourcecatalogue):
     print("mapkey = ", mapkey)
     return keymap, mapkey
 
-def read_csv_file(csv_path, col_names):
-    df = pd.read_csv(csv_path, names=col_names, header=None, sep=' ')
+def read_csv_file(csv_path, col_names, sep):
+    df = pd.read_csv(csv_path, names=col_names, header=None, sep=sep)
     return df
 
 def lr_train(dataset, iter_no):
     torch.manual_seed(42)  # Set shuffle seed to a certain value for reproducibility
     dataloader = DataLoader(dataset=dataset, shuffle=True)
     # Splitting dataloader into train/dev/test sets
-    train_size = int(1.0 * len(dataloader.dataset))  # You did a 70%:30% train:test split
+    train_size = int(1.0 * len(dataloader.dataset))
     test_size = len(dataloader.dataset) - train_size
     train_dataset, test_dataset = torch.utils.data.random_split(dataloader.dataset, [train_size, test_size])
     print("train_size = ", train_size)
@@ -249,7 +249,8 @@ def lr_train(dataset, iter_no):
     print("len(train_dataset.dataset) = ", len(train_dataset.dataset))
     torch.set_default_tensor_type(torch.DoubleTensor)
     torch.manual_seed(82)
-    LogRegModel = LogisticRegression(train_dataset)
+    print(train_dataset)
+    LogRegModel = LogisticRegression.LogisticRegression(train_dataset)
     # Stochastic Gradient Descent. I could use Adams but Adams is worse than regular SGD unless you
     optimizer = torch.optim.SGD(LogRegModel.parameters(), lr=0.0001)
     print("optimizer = ", optimizer.__class__)
