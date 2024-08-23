@@ -101,8 +101,8 @@ tbl6_dr1_2_3_4 = pd.merge(tbl6_dr1_2_3, dr4_df, left_on='3fgl', right_on='4fgldr
 print(tbl6_dr1_2_3_4)
 tbl6_dr1_2_3_4.to_csv('../../CSV/tbl6_dr1_2_3_4'+csv_suffix+'.csv')
 
-iter_no = 100
-trees = 100
+iter_no = 250
+trees = 200
 samples = 750
 depth = 10
 print("########################### Predict 4FGL-DR1 ###########################")
