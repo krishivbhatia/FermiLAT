@@ -7,8 +7,11 @@ Created on Thu Aug 10 13:15:48 2023
 """
 
 import os
+
+import numpy as np
 from astropy.io import fits
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 from Utils.FGL4Dataset_Tbl1 import FGL4Dataset_Tbl1
 
 
@@ -35,12 +38,12 @@ flux_col = "Flux_Band"
 wanted_type_col = 69  # class1
 dr4_dataset = FGL4Dataset_Tbl1(wanted_type_col, flux_col, wantedtypes, wantedfeaturenames_4fgldr3_4,
                                point_source_catalogue)
-signif_index,psr_signif,agn_signif,unassociated_signf = dr4_dataset.get_signif()
-psr_fraction = [x/sum(psr_signif) for x in psr_signif]
-agn_fraction = [x/sum(agn_signif) for x in agn_signif]
-unassociated_fraction = [x/sum(unassociated_signf) for x in unassociated_signf]
+signif_index,psr_signif,agn_signif,unassociated_signif,total_signif = dr4_dataset.get_signif()
 print(psr_signif)
 print(agn_signif)
+psr_fraction = [x/y for (x,y) in zip(psr_signif, total_signif)]
+agn_fraction = [x/y for (x,y) in zip(agn_signif, total_signif)]
+unassociated_fraction = [x/y for (x,y) in zip(unassociated_signif, total_signif)]
 
 fig, ax = plt.subplots(figsize=(8,5))
 plt.plot(signif_index, psr_fraction, label='PSR', linestyle='solid')
@@ -50,4 +53,10 @@ ax.set_xlabel('Significance')
 ax.set_ylabel('Fraction of Sources')
 plt.legend(loc='upper right')
 plt.title('Fraction of 4FGL-DR4 Sources as a function of Signif-Avg')
+ax.set_xscale('log')
+ax.set_xticks([5,10,15,20,25,30])
+ax.get_xaxis().set_major_formatter(ticker.ScalarFormatter())
+ax.set_yscale('log')
+ax.set_yticks([0.01,0.02,0.05,0.2,0.2,0.5,1.00])
+ax.get_yaxis().set_major_formatter(ticker.ScalarFormatter())
 plt.show()
